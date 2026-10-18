@@ -35,7 +35,9 @@ export type EditAction =
   | { type: "moveClip"; clipId: string; trackId?: string; startUs: Micros }
   | { type: "trimClip"; clipId: string; edge: "start" | "end"; atUs: Micros }
   | { type: "splitClip"; clipId: string; atUs: Micros; newClipId: string }
-  | { type: "deleteClips"; clipIds: string[] };
+  | { type: "deleteClips"; clipIds: string[] }
+  /** Várias edições como um único passo de desfazer; se uma falhar, nenhuma é aplicada. */
+  | { type: "batch"; actions: EditAction[] };
 
 export type DocumentAction =
   | { type: "new"; project: Project }
@@ -89,6 +91,15 @@ function applyEdit(project: Project, action: EditAction): Project | null | strin
       return unwrap(splitClip(project, action.clipId, action.atUs, action.newClipId));
     case "deleteClips":
       return unwrap(deleteClips(project, action.clipIds));
+    case "batch": {
+      let current = project;
+      for (const a of action.actions) {
+        const next = applyEdit(current, a);
+        if (typeof next === "string") return next;
+        if (next) current = next;
+      }
+      return current === project ? null : current;
+    }
   }
 }
 

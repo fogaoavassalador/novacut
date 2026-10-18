@@ -194,6 +194,33 @@ describe("histórico (desfazer/refazer)", () => {
     expect(d.dirty).toBe(true);
   });
 
+  it("lote: várias divisões viram um único passo de desfazer", () => {
+    let d = documentReducer(withVideo(), { type: "addClip", clipId: "c", mediaId: "v" });
+    d = documentReducer(d, {
+      type: "batch",
+      actions: [
+        { type: "splitClip", clipId: "c", atUs: 2_000_000, newClipId: "d" },
+        { type: "splitClip", clipId: "d", atUs: 6_000_000, newClipId: "e" },
+      ],
+    });
+    expect(d.project.tracks[1].clips.map((c) => c.id)).toEqual(["c", "d", "e"]);
+    d = documentReducer(d, { type: "undo" });
+    expect(d.project.tracks[1].clips.map((c) => c.id)).toEqual(["c"]);
+  });
+
+  it("lote com uma falha não aplica nada", () => {
+    const d0 = documentReducer(withVideo(), { type: "addClip", clipId: "c", mediaId: "v" });
+    const d = documentReducer(d0, {
+      type: "batch",
+      actions: [
+        { type: "splitClip", clipId: "c", atUs: 2_000_000, newClipId: "d" },
+        { type: "splitClip", clipId: "nao-existe", atUs: 6_000_000, newClipId: "e" },
+      ],
+    });
+    expect(d.project).toBe(d0.project);
+    expect(d.lastError).toBe("clipe não encontrado");
+  });
+
   it("o histórico é limitado", () => {
     let d = initialDocument();
     for (let i = 0; i < HISTORY_LIMIT + 50; i++) d = documentReducer(d, { type: "rename", name: `n${i}` });

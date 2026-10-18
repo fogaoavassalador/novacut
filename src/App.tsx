@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { newId } from "./core/project/project";
-import { formatTimecode } from "./core/time";
+import { formatTimecode, type Micros } from "./core/time";
+import { pruneSelection } from "./core/timeline/selection";
 import { canRedo, canUndo } from "./state/document";
 import { useMediaImport } from "./state/useMediaImport";
 import { useProjectDocument } from "./state/useProjectDocument";
@@ -30,7 +31,12 @@ export default function App() {
     clearError,
   } = useProjectDocument();
   const { importState, importFromDialog, dismissFailures } = useMediaImport(getProject, addMedia);
-  const { settings, tracks, media } = doc.project;
+  const { settings } = doc.project;
+  const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
+  const [playheadUs, setPlayheadUs] = useState<Micros>(0);
+
+  // Clipes que deixaram de existir (desfazer, excluir, abrir outro projeto) saem da seleção.
+  useEffect(() => setSelected((s) => pruneSelection(doc.project, s)), [doc.project]);
 
   useEffect(() => {
     if (!doc.lastError) return;
@@ -76,7 +82,7 @@ export default function App() {
                 className="preview-frame"
                 style={{ aspectRatio: `${settings.width} / ${settings.height}`, background: settings.background }}
               >
-                <span className="preview-timecode">{formatTimecode(0, settings.fps)}</span>
+                <span className="preview-timecode">{formatTimecode(playheadUs, settings.fps)}</span>
               </div>
             </div>
           </div>
@@ -94,7 +100,14 @@ export default function App() {
       </main>
 
       <div className="timeline-wrap">
-        <Timeline tracks={tracks} media={media} fps={settings.fps} pxPerSecond={60} scrollUs={0} playheadUs={0} />
+        <Timeline
+          project={doc.project}
+          selected={selected}
+          onSelect={setSelected}
+          playheadUs={playheadUs}
+          onPlayhead={setPlayheadUs}
+          onEdit={edit}
+        />
         {doc.lastError && (
           <div className="edit-error" role="alert" onClick={clearError}>
             {doc.lastError}

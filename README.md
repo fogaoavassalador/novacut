@@ -24,6 +24,33 @@ npm run samples      # gera mídias sintéticas + samples/demo.ncproj (fora do G
 
 Um projeto também pode ser aberto pela linha de comando: `novacut.exe caminho\projeto.ncproj`.
 
+### Teste E2E da timeline
+
+`scripts/e2e-timeline.mjs` dirige o app real pelo protocolo de depuração do WebView2 (CDP, só em
+127.0.0.1) e verifica selecionar, arrastar, cortar, dividir, excluir, desfazer e zoom:
+
+```powershell
+npm run samples
+npm run dev                                   # em outro terminal
+cargo build --manifest-path src-tauri/Cargo.toml
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--remote-debugging-port=9333 --remote-debugging-address=127.0.0.1"
+src-tauri\target\debug\novacut.exe samples\demo.ncproj
+node scripts/e2e-timeline.mjs
+```
+
+## Atalhos da timeline
+
+| Ação | Atalho |
+|---|---|
+| Dividir no playhead (selecionados; sem seleção, todos sob o playhead) | `S` ou `Ctrl+B` |
+| Excluir selecionados | `Delete` / `Backspace` |
+| Selecionar vários / todos | `Ctrl`/`Shift`+clique · `Ctrl+A` |
+| Mover o playhead 1 quadro / 1 s | `←` `→` / `Shift+←` `Shift+→` |
+| Início / fim | `Home` / `End` |
+| Zoom | `Ctrl`+roda (no ponteiro), `+` / `−`, botão Ajustar |
+| Rolar a timeline | roda do mouse |
+| Cancelar arraste | `Esc` |
+
 ## Arquitetura
 
 ```
@@ -78,7 +105,8 @@ e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `
 - [x] Etapa 3 — importação (diálogo e arrastar-e-soltar) + ffprobe + biblioteca com miniaturas
 - [x] Etapa 4 — modelo da timeline (adicionar, mover, cortar, dividir, excluir, desfazer/refazer);
       clipes exibidos na timeline, duplo clique em mídia adiciona ao fim da faixa
-- [ ] Etapa 5 — interação da timeline
+- [x] Etapa 5 — interação da timeline: seleção, arrastar entre faixas com encaixe, cortar pelas
+      bordas, dividir no playhead, excluir, zoom e rolagem, playhead pela régua
 - [ ] Etapa 6 — motor de pré-visualização
 - [ ] Etapa 7 — propriedades: volume, velocidade, brilho, contraste
 - [ ] Etapa 8 — exportação MP4
