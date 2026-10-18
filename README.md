@@ -30,7 +30,7 @@ Um projeto também pode ser aberto pela linha de comando: `novacut.exe caminho\p
 src/core/       lógica pura, sem React nem Tauri (testada com Vitest)
   time.ts         tempo em microssegundos inteiros, frames e timecode
   project/        formato .ncproj: schema (zod), invariantes, serializar/ler, migrações
-  timeline/       régua (e, nas próximas etapas, operações de timeline)
+  timeline/       régua e operações puras (ops.ts), com teste de propriedade de invariantes
 src/state/      documento aberto (reducer puro) e hook que liga diálogos e arquivos
 src/platform/   adaptadores para comandos Tauri (ffmpeg.ts, projectFiles.ts)
 src/ui/         componentes React e tema escuro
@@ -76,7 +76,8 @@ e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `
 - [x] Etapa 2 — formato de projeto `.ncproj` (novo/abrir/salvar/salvar como, atalhos, aviso de
       alterações não salvas)
 - [x] Etapa 3 — importação (diálogo e arrastar-e-soltar) + ffprobe + biblioteca com miniaturas
-- [ ] Etapa 4 — modelo da timeline (adicionar, mover, cortar, dividir, desfazer)
+- [x] Etapa 4 — modelo da timeline (adicionar, mover, cortar, dividir, excluir, desfazer/refazer);
+      clipes exibidos na timeline, duplo clique em mídia adiciona ao fim da faixa
 - [ ] Etapa 5 — interação da timeline
 - [ ] Etapa 6 — motor de pré-visualização
 - [ ] Etapa 7 — propriedades: volume, velocidade, brilho, contraste

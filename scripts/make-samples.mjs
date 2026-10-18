@@ -1,6 +1,6 @@
 // Gera mídias sintéticas para desenvolvimento e testes manuais em ./samples
 // (vídeo com áudio, vídeo vertical, áudio, imagem e GIF), além de
-// samples/demo.ncproj, que referencia essas mídias na biblioteca.
+// samples/demo.ncproj, que referencia essas mídias e já traz alguns clipes na timeline.
 // Uso: npm run samples   (requer ffmpeg e ffprobe no PATH)
 
 import { execFileSync } from "node:child_process";
@@ -58,6 +58,23 @@ function probe(path) {
 
 const now = new Date().toISOString();
 const track = (kind, name) => ({ id: randomUUID(), kind, name, muted: false, hidden: false, clips: [] });
+const media = files.map((f) => probe(join(outDir, f.name)));
+const [bars, vertical, tone, still] = media;
+const clip = (m, startS, inS, outS) => ({
+  id: randomUUID(),
+  mediaId: m.id,
+  timelineStartUs: Math.round(startS * 1e6),
+  sourceInUs: Math.round(inS * 1e6),
+  sourceOutUs: Math.round(outS * 1e6),
+  speed: 1,
+  volume: 1,
+  brightness: 1,
+  contrast: 1,
+});
+const [v2, v1, a1] = [track("video", "V2"), track("video", "V1"), track("audio", "A1")];
+v1.clips.push(clip(bars, 0, 0, 8), clip(still, 8, 0, 4));
+v2.clips.push(clip(vertical, 2, 0.5, 4.5));
+a1.clips.push(clip(tone, 1, 0, 6));
 const project = {
   format: "novacut-project",
   formatVersion: 1,
@@ -66,8 +83,8 @@ const project = {
   createdAt: now,
   modifiedAt: now,
   settings: { width: 1920, height: 1080, fps: 30, sampleRate: 48000, background: "#000000" },
-  media: files.map((f) => probe(join(outDir, f.name))),
-  tracks: [track("video", "V2"), track("video", "V1"), track("audio", "A1")],
+  media,
+  tracks: [v2, v1, a1],
 };
 writeFileSync(join(outDir, "demo.ncproj"), JSON.stringify(project, null, 2) + "\n");
 console.log("projeto:", join(outDir, "demo.ncproj"));

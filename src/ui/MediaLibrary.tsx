@@ -10,12 +10,14 @@ interface MediaLibraryProps {
   importState: ImportState;
   onImport: () => void;
   onRemove: (mediaId: string) => void;
+  /** Duplo clique: adiciona a mídia à timeline. */
+  onActivate: (mediaId: string) => void;
   onDismissNotice: () => void;
 }
 
 const KIND_LABEL = { video: "Vídeo", audio: "Áudio", image: "Imagem" } as const;
 
-export function MediaLibrary({ project, importState, onImport, onRemove, onDismissNotice }: MediaLibraryProps) {
+export function MediaLibrary({ project, importState, onImport, onRemove, onActivate, onDismissNotice }: MediaLibraryProps) {
   const { media } = project;
   const { pending, failures, skipped, dragOver } = importState;
 
@@ -57,12 +59,18 @@ export function MediaLibrary({ project, importState, onImport, onRemove, onDismi
         {media.length === 0 ? (
           <div className="empty-state">
             <strong>Biblioteca vazia</strong>
-            Clique em Importar… ou arraste vídeos, áudios e imagens para a janela.
+            Clique em Importar… ou arraste vídeos, áudios e imagens para a janela. Depois, dê um duplo clique numa mídia para levá-la à timeline.
           </div>
         ) : (
           <ul className="media-grid">
             {media.map((m) => (
-              <MediaCard key={m.id} media={m} inUse={isMediaInUse(project, m.id)} onRemove={onRemove} />
+              <MediaCard
+                key={m.id}
+                media={m}
+                inUse={isMediaInUse(project, m.id)}
+                onRemove={onRemove}
+                onActivate={onActivate}
+              />
             ))}
           </ul>
         )}
@@ -73,7 +81,14 @@ export function MediaLibrary({ project, importState, onImport, onRemove, onDismi
   );
 }
 
-function MediaCard({ media, inUse, onRemove }: { media: MediaRef; inUse: boolean; onRemove: (id: string) => void }) {
+interface MediaCardProps {
+  media: MediaRef;
+  inUse: boolean;
+  onRemove: (id: string) => void;
+  onActivate: (id: string) => void;
+}
+
+function MediaCard({ media, inUse, onRemove, onActivate }: MediaCardProps) {
   const details = [
     KIND_LABEL[media.kind],
     media.width && media.height ? `${media.width}×${media.height}` : null,
@@ -81,7 +96,11 @@ function MediaCard({ media, inUse, onRemove }: { media: MediaRef; inUse: boolean
   ].filter(Boolean);
 
   return (
-    <li className="media-card" title={media.path}>
+    <li
+      className="media-card"
+      title={`${media.path}\nDuplo clique para adicionar à timeline`}
+      onDoubleClick={() => onActivate(media.id)}
+    >
       <Thumbnail media={media} />
       {media.durationUs !== null && (
         <span className="media-duration">{formatTimecode(media.durationUs, media.fps ?? 30)}</span>
@@ -92,6 +111,7 @@ function MediaCard({ media, inUse, onRemove }: { media: MediaRef; inUse: boolean
         className="media-remove"
         disabled={inUse}
         onClick={() => onRemove(media.id)}
+        onDoubleClick={(e) => e.stopPropagation()}
         title={inUse ? "Em uso na timeline" : "Remover da biblioteca"}
         aria-label={`Remover ${media.name}`}
       >

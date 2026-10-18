@@ -8,9 +8,14 @@ interface TopBarProps {
   onSave: () => void;
   onSaveAs: () => void;
   onRename: (name: string) => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
-export function TopBar({ doc, onNew, onOpen, onSave, onSaveAs, onRename }: TopBarProps) {
+export function TopBar(props: TopBarProps) {
+  const { doc, onNew, onOpen, onSave, onSaveAs, onRename, onUndo, onRedo, canUndo, canRedo } = props;
   const [draft, setDraft] = useState(doc.project.name);
   useEffect(() => setDraft(doc.project.name), [doc.project.name]);
 
@@ -29,6 +34,14 @@ export function TopBar({ doc, onNew, onOpen, onSave, onSaveAs, onRename }: TopBa
         <button onClick={onOpen} title="Abrir projeto (Ctrl+O)">Abrir…</button>
         <button onClick={onSave} title="Salvar (Ctrl+S)">Salvar</button>
         <button onClick={onSaveAs} title="Salvar como (Ctrl+Shift+S)">Salvar como…</button>
+      </nav>
+      <nav className="file-actions" aria-label="Histórico">
+        <button onClick={onUndo} disabled={!canUndo} title="Desfazer (Ctrl+Z)" aria-label="Desfazer">
+          ↶
+        </button>
+        <button onClick={onRedo} disabled={!canRedo} title="Refazer (Ctrl+Y)" aria-label="Refazer">
+          ↷
+        </button>
       </nav>
       <input
         className="project-name-input"

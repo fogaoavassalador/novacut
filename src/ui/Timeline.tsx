@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { formatTimecode, type Micros } from "../core/time";
+import { clipDurationUs } from "../core/project/project";
+import type { MediaRef, Track } from "../core/project/schema";
+import { formatTimecode, type Micros, US_PER_SECOND } from "../core/time";
 import { rulerTicks } from "../core/timeline/ruler";
 
-interface TrackInfo {
-  id: string;
-  label: string;
-  kind: "video" | "audio";
-}
-
 interface TimelineProps {
-  tracks: TrackInfo[];
+  tracks: Track[];
+  media: MediaRef[];
   fps: number;
   pxPerSecond: number;
   scrollUs: Micros;
@@ -29,10 +26,11 @@ function useWidth<T extends HTMLElement>() {
   return [ref, width] as const;
 }
 
-export function Timeline({ tracks, fps, pxPerSecond, scrollUs, playheadUs }: TimelineProps) {
+export function Timeline({ tracks, media, fps, pxPerSecond, scrollUs, playheadUs }: TimelineProps) {
   const [rulerRef, width] = useWidth<HTMLDivElement>();
   const ticks = rulerTicks(scrollUs, width, pxPerSecond);
-  const playheadX = ((playheadUs - scrollUs) / 1_000_000) * pxPerSecond;
+  const toX = (us: Micros) => ((us - scrollUs) / US_PER_SECOND) * pxPerSecond;
+  const mediaById = new Map(media.map((m) => [m.id, m]));
 
   return (
     <section className="timeline" aria-label="Timeline">
@@ -48,24 +46,46 @@ export function Timeline({ tracks, fps, pxPerSecond, scrollUs, playheadUs }: Tim
             )}
           </div>
         ))}
-        <div className="playhead" style={{ left: playheadX }} />
+        <div className="playhead" style={{ left: toX(playheadUs) }} />
       </div>
       {tracks.map((track) => (
-        <TrackRow key={track.id} track={track} playheadX={playheadX} />
+        <TrackRow key={track.id} track={track} mediaById={mediaById} toX={toX} pxPerSecond={pxPerSecond} playheadX={toX(playheadUs)} />
       ))}
     </section>
   );
 }
 
-function TrackRow({ track, playheadX }: { track: TrackInfo; playheadX: number }) {
+interface TrackRowProps {
+  track: Track;
+  mediaById: Map<string, MediaRef>;
+  toX: (us: Micros) => number;
+  pxPerSecond: number;
+  playheadX: number;
+}
+
+function TrackRow({ track, mediaById, toX, pxPerSecond, playheadX }: TrackRowProps) {
   const color = track.kind === "video" ? "var(--track-video)" : "var(--track-audio)";
   return (
     <>
       <div className="track-header">
         <span className="badge" style={{ background: color }} />
-        {track.label}
+        {track.name}
       </div>
       <div className="track-lane">
+        {track.clips.map((clip) => {
+          const m = mediaById.get(clip.mediaId);
+          const widthPx = (clipDurationUs(clip) / US_PER_SECOND) * pxPerSecond;
+          return (
+            <div
+              key={clip.id}
+              className={`clip ${track.kind}${m?.kind === "image" ? " image" : ""}`}
+              style={{ left: toX(clip.timelineStartUs), width: Math.max(2, widthPx) }}
+              title={`${m?.name ?? "mídia ausente"}\n${(clipDurationUs(clip) / US_PER_SECOND).toFixed(2)} s`}
+            >
+              <span className="clip-label">{m?.name ?? "?"}</span>
+            </div>
+          );
+        })}
         <div className="playhead" style={{ left: playheadX }} />
       </div>
     </>

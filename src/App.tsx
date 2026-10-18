@@ -1,4 +1,7 @@
+import { useEffect } from "react";
+import { newId } from "./core/project/project";
 import { formatTimecode } from "./core/time";
+import { canRedo, canUndo } from "./state/document";
 import { useMediaImport } from "./state/useMediaImport";
 import { useProjectDocument } from "./state/useProjectDocument";
 import { MediaLibrary } from "./ui/MediaLibrary";
@@ -7,11 +10,33 @@ import { Timeline } from "./ui/Timeline";
 import { TopBar } from "./ui/TopBar";
 import "./ui/theme.css";
 
+/** Tempo que um aviso de edição recusada fica visível. */
+const ERROR_TOAST_MS = 4000;
+
 export default function App() {
-  const { doc, newProject, openProject, saveProject, saveAs, rename, addMedia, removeMedia, getProject } =
-    useProjectDocument();
+  const {
+    doc,
+    newProject,
+    openProject,
+    saveProject,
+    saveAs,
+    rename,
+    addMedia,
+    removeMedia,
+    getProject,
+    edit,
+    undo,
+    redo,
+    clearError,
+  } = useProjectDocument();
   const { importState, importFromDialog, dismissFailures } = useMediaImport(getProject, addMedia);
-  const { settings, tracks } = doc.project;
+  const { settings, tracks, media } = doc.project;
+
+  useEffect(() => {
+    if (!doc.lastError) return;
+    const t = setTimeout(clearError, ERROR_TOAST_MS);
+    return () => clearTimeout(t);
+  }, [doc.lastError, clearError]);
 
   return (
     <div className="app">
@@ -22,6 +47,10 @@ export default function App() {
         onSave={saveProject}
         onSaveAs={saveAs}
         onRename={rename}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={canUndo(doc)}
+        canRedo={canRedo(doc)}
       />
 
       <main className="workspace">
@@ -30,6 +59,7 @@ export default function App() {
           importState={importState}
           onImport={importFromDialog}
           onRemove={removeMedia}
+          onActivate={(mediaId) => edit({ type: "addClip", clipId: newId(), mediaId })}
           onDismissNotice={dismissFailures}
         />
 
@@ -63,13 +93,14 @@ export default function App() {
         </section>
       </main>
 
-      <Timeline
-        tracks={tracks.map((t) => ({ id: t.id, label: t.name, kind: t.kind }))}
-        fps={settings.fps}
-        pxPerSecond={60}
-        scrollUs={0}
-        playheadUs={0}
-      />
+      <div className="timeline-wrap">
+        <Timeline tracks={tracks} media={media} fps={settings.fps} pxPerSecond={60} scrollUs={0} playheadUs={0} />
+        {doc.lastError && (
+          <div className="edit-error" role="alert" onClick={clearError}>
+            {doc.lastError}
+          </div>
+        )}
+      </div>
 
       <StatusBar />
     </div>

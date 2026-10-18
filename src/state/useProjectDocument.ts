@@ -14,6 +14,7 @@ import {
 import {
   DEFAULT_PROJECT_NAME,
   documentReducer,
+  type EditAction,
   initialDocument,
   prepareForSave,
   windowTitle,
@@ -119,20 +120,45 @@ export function useProjectDocument() {
     };
   }, [confirmDiscard]);
 
-  // Atalhos: Ctrl+N, Ctrl+O, Ctrl+S, Ctrl+Shift+S.
+  const edit = useCallback((action: EditAction) => dispatch(action), []);
+  const undo = useCallback(() => dispatch({ type: "undo" }), []);
+  const redo = useCallback(() => dispatch({ type: "redo" }), []);
+  const clearError = useCallback(() => dispatch({ type: "clearError" }), []);
+
+  // Atalhos: Ctrl+N, Ctrl+O, Ctrl+S, Ctrl+Shift+S, Ctrl+Z, Ctrl+Y / Ctrl+Shift+Z.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!e.ctrlKey || e.altKey) return;
       const key = e.key.toLowerCase();
-      const run =
-        key === "n" ? newProject : key === "o" ? openProject : key === "s" ? (e.shiftKey ? saveAs : saveProject) : null;
+      // Em campos de texto, desfazer/refazer pertencem ao próprio campo.
+      const inText = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+      let run: (() => unknown) | null = null;
+      if (key === "n") run = newProject;
+      else if (key === "o") run = openProject;
+      else if (key === "s") run = e.shiftKey ? saveAs : saveProject;
+      else if (!inText && key === "z") run = e.shiftKey ? redo : undo;
+      else if (!inText && key === "y") run = redo;
       if (!run) return;
       e.preventDefault();
       void run();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [newProject, openProject, saveAs, saveProject]);
+  }, [newProject, openProject, saveAs, saveProject, undo, redo]);
 
-  return { doc, newProject, openProject, saveProject, saveAs, rename, addMedia, removeMedia, getProject };
+  return {
+    doc,
+    newProject,
+    openProject,
+    saveProject,
+    saveAs,
+    rename,
+    addMedia,
+    removeMedia,
+    getProject,
+    edit,
+    undo,
+    redo,
+    clearError,
+  };
 }

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { createEmptyProject } from "../core/project/project";
 import type { MediaRef } from "../core/project/schema";
 import {
+  canRedo,
+  canUndo,
   DEFAULT_PROJECT_NAME,
+  HISTORY_LIMIT,
   documentReducer,
   fileStem,
   initialDocument,
@@ -39,7 +42,7 @@ describe("documentReducer", () => {
   it("carregar e novo substituem o documento", () => {
     const p = createEmptyProject("Aberto", NOW);
     const loaded = documentReducer(initialDocument(), { type: "loaded", project: p, filePath: "a.ncproj" });
-    expect(loaded).toEqual({ project: p, filePath: "a.ncproj", dirty: false });
+    expect(loaded).toMatchObject({ project: p, filePath: "a.ncproj", dirty: false, past: [], future: [] });
     const fresh = documentReducer(loaded, { type: "new", project: createEmptyProject("N", NOW) });
     expect(fresh.filePath).toBeNull();
   });
@@ -111,8 +114,90 @@ describe("mídias", () => {
     };
     const removed = documentReducer(d, { type: "removeMedia", mediaId: "a" });
     expect(removed.project.media.map((m) => m.id)).toEqual(["b"]);
-    expect(documentReducer(removed, { type: "removeMedia", mediaId: "b" })).toBe(removed);
+    const refused = documentReducer(removed, { type: "removeMedia", mediaId: "b" });
+    expect(refused.project).toBe(removed.project);
+    expect(refused.lastError).toBe("a mídia está em uso na timeline");
     expect(documentReducer(removed, { type: "removeMedia", mediaId: "nao-existe" })).toBe(removed);
+  });
+});
+
+describe("histórico (desfazer/refazer)", () => {
+  const withVideo = () =>
+    documentReducer(initialDocument(), {
+      type: "addMedia",
+      media: [
+        {
+          id: "v",
+          kind: "video",
+          path: "C:\\v.mp4",
+          name: "v.mp4",
+          durationUs: 10_000_000,
+          width: 1920,
+          height: 1080,
+          fps: 30,
+          hasVideo: true,
+          hasAudio: true,
+        },
+      ],
+    });
+
+  it("desfaz e refaz uma sequência de edições de timeline", () => {
+    let d = withVideo();
+    d = documentReducer(d, { type: "addClip", clipId: "c", mediaId: "v" });
+    d = documentReducer(d, { type: "splitClip", clipId: "c", atUs: 4_000_000, newClipId: "d" });
+    d = documentReducer(d, { type: "moveClip", clipId: "d", startUs: 12_000_000 });
+    const clipIds = (x: typeof d) => x.project.tracks.flatMap((t) => t.clips.map((c) => `${c.id}@${c.timelineStartUs}`));
+    expect(clipIds(d)).toEqual(["c@0", "d@12000000"]);
+
+    d = documentReducer(d, { type: "undo" });
+    expect(clipIds(d)).toEqual(["c@0", "d@4000000"]);
+    d = documentReducer(d, { type: "undo" });
+    expect(clipIds(d)).toEqual(["c@0"]);
+    d = documentReducer(d, { type: "redo" });
+    expect(clipIds(d)).toEqual(["c@0", "d@4000000"]);
+  });
+
+  it("uma edição nova descarta o que podia ser refeito", () => {
+    let d = documentReducer(withVideo(), { type: "addClip", clipId: "c", mediaId: "v" });
+    d = documentReducer(d, { type: "undo" });
+    expect(canRedo(d)).toBe(true);
+    d = documentReducer(d, { type: "rename", name: "Outro" });
+    expect(canRedo(d)).toBe(false);
+  });
+
+  it("desfazer/refazer sem histórico não muda nada", () => {
+    const d = initialDocument();
+    expect(documentReducer(d, { type: "undo" })).toBe(d);
+    expect(documentReducer(d, { type: "redo" })).toBe(d);
+    expect(canUndo(d)).toBe(false);
+  });
+
+  it("edição recusada registra o motivo e não entra no histórico", () => {
+    let d = documentReducer(withVideo(), { type: "addClip", clipId: "c", mediaId: "v", startUs: 0 });
+    const before = d;
+    d = documentReducer(d, { type: "addClip", clipId: "x", mediaId: "v", startUs: 1_000_000 });
+    expect(d.project).toBe(before.project);
+    expect(d.past).toBe(before.past);
+    expect(d.lastError).toBe("o espaço na faixa já está ocupado");
+    expect(documentReducer(d, { type: "clearError" }).lastError).toBeNull();
+  });
+
+  it("'não salvo' compara com a versão gravada: desfazer até ela limpa o indicador", () => {
+    let d = withVideo();
+    d = documentReducer(d, { type: "saved", project: d.project, filePath: "C:\\p.ncproj" });
+    expect(d.dirty).toBe(false);
+    d = documentReducer(d, { type: "addClip", clipId: "c", mediaId: "v" });
+    expect(d.dirty).toBe(true);
+    d = documentReducer(d, { type: "undo" });
+    expect(d.dirty).toBe(false);
+    d = documentReducer(d, { type: "undo" }); // volta para antes da importação
+    expect(d.dirty).toBe(true);
+  });
+
+  it("o histórico é limitado", () => {
+    let d = initialDocument();
+    for (let i = 0; i < HISTORY_LIMIT + 50; i++) d = documentReducer(d, { type: "rename", name: `n${i}` });
+    expect(d.past).toHaveLength(HISTORY_LIMIT);
   });
 });
 
