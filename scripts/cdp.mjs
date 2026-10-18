@@ -64,7 +64,7 @@ export async function connect(port = process.env.CDP_PORT ?? 9333) {
     return mid;
   }
 
-  const VK = { s: 83, z: 90, y: 89, Delete: 46, Space: 32, End: 35, Home: 36 };
+  const VK = { s: 83, z: 90, y: 89, Delete: 46, Space: 32, End: 35, Home: 36, Enter: 13 };
   async function key(k, modifiers = 0) {
     const isChar = k.length === 1;
     const code = isChar ? `Key${k.toUpperCase()}` : k;
@@ -72,6 +72,7 @@ export async function connect(port = process.env.CDP_PORT ?? 9333) {
     const base = { key: keyName, code, windowsVirtualKeyCode: VK[k], modifiers };
     await send("Input.dispatchKeyEvent", { type: "rawKeyDown", ...base });
     if ((isChar || k === "Space") && !modifiers) await send("Input.dispatchKeyEvent", { type: "char", text: keyName, ...base });
+    if (k === "Enter") await send("Input.dispatchKeyEvent", { type: "char", text: "\r", ...base });
     await send("Input.dispatchKeyEvent", { type: "keyUp", ...base });
     await sleep(80);
   }
@@ -98,5 +99,12 @@ export async function connect(port = process.env.CDP_PORT ?? 9333) {
     process.exit(failures ? 1 : 0);
   }
 
-  return { send, evaluate, click, doubleClick, drag, key, reloadDemo, check, finish };
+  /** Foca um campo de texto, substitui o conteúdo e confirma com Enter. */
+  async function typeInto(selector, text) {
+    await evaluate(`(() => { const e = document.querySelector(${JSON.stringify(selector)}); e.focus(); e.select(); })()`);
+    await send("Input.insertText", { text });
+    await key("Enter");
+  }
+
+  return { send, evaluate, click, doubleClick, drag, key, typeInto, reloadDemo, check, finish };
 }

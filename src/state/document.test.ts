@@ -221,6 +221,37 @@ describe("histórico (desfazer/refazer)", () => {
     expect(d.lastError).toBe("clipe não encontrado");
   });
 
+  it("ajustes com a mesma chave de agrupamento viram um único passo", () => {
+    let d = documentReducer(withVideo(), { type: "addClip", clipId: "c", mediaId: "v" });
+    const beforeDrag = d.project;
+    for (const v of [1.1, 1.2, 1.3, 1.4])
+      d = documentReducer(d, { type: "setClipProps", clipIds: ["c"], props: { brightness: v }, coalesceKey: "arraste-1" });
+    expect(d.project.tracks[1].clips[0].brightness).toBe(1.4);
+    d = documentReducer(d, { type: "undo" });
+    expect(d.project).toBe(beforeDrag);
+  });
+
+  it("chaves diferentes, ou outra edição no meio, criam passos separados", () => {
+    let d = documentReducer(withVideo(), { type: "addClip", clipId: "c", mediaId: "v" });
+    d = documentReducer(d, { type: "setClipProps", clipIds: ["c"], props: { volume: 0.5 }, coalesceKey: "k1" });
+    d = documentReducer(d, { type: "rename", name: "meio" });
+    d = documentReducer(d, { type: "setClipProps", clipIds: ["c"], props: { volume: 0.7 }, coalesceKey: "k1" });
+    d = documentReducer(d, { type: "setClipProps", clipIds: ["c"], props: { volume: 0.9 }, coalesceKey: "k2" });
+    d = documentReducer(d, { type: "undo" });
+    expect(d.project.tracks[1].clips[0].volume).toBe(0.7);
+    d = documentReducer(d, { type: "undo" });
+    expect(d.project.tracks[1].clips[0].volume).toBe(0.5);
+  });
+
+  it("após desfazer, a mesma chave não se funde com o estado desfeito", () => {
+    let d = documentReducer(withVideo(), { type: "addClip", clipId: "c", mediaId: "v" });
+    d = documentReducer(d, { type: "setClipProps", clipIds: ["c"], props: { volume: 0.5 }, coalesceKey: "k" });
+    d = documentReducer(d, { type: "undo" });
+    d = documentReducer(d, { type: "setClipProps", clipIds: ["c"], props: { volume: 0.6 }, coalesceKey: "k" });
+    d = documentReducer(d, { type: "undo" });
+    expect(d.project.tracks[1].clips[0].volume).toBe(1);
+  });
+
   it("o histórico é limitado", () => {
     let d = initialDocument();
     for (let i = 0; i < HISTORY_LIMIT + 50; i++) d = documentReducer(d, { type: "rename", name: `n${i}` });

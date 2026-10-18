@@ -1,11 +1,14 @@
-// Gera mídias sintéticas para desenvolvimento e testes manuais em ./samples
-// (vídeo com áudio, vídeo vertical, áudio, imagem e GIF), além de
-// samples/demo.ncproj, que referencia essas mídias e já traz alguns clipes na timeline.
+// Gera mídias sintéticas em ./samples (vídeo com áudio, vídeo vertical, áudio,
+// imagem e GIF) e dois projetos com os mesmos clipes:
+//   - samples/e2e.ncproj  — fixture dos testes E2E, sempre regenerado;
+//   - samples/demo.ncproj — para uso manual, criado só se ainda não existir
+//     (nunca sobrescreve um demo que você editou e salvou).
+// Mídias já existentes não são regeradas.
 // Uso: npm run samples   (requer ffmpeg e ffprobe no PATH)
 
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const outDir = resolve("samples");
@@ -28,6 +31,7 @@ const files = [
 ];
 
 for (const f of files) {
+  if (existsSync(join(outDir, f.name))) continue;
   ff([...f.args, join(outDir, f.name)]);
   console.log("gerado:", f.name);
 }
@@ -56,35 +60,48 @@ function probe(path) {
   };
 }
 
-const now = new Date().toISOString();
-const track = (kind, name) => ({ id: randomUUID(), kind, name, muted: false, hidden: false, clips: [] });
-const media = files.map((f) => probe(join(outDir, f.name)));
-const [bars, vertical, tone, still] = media;
-const clip = (m, startS, inS, outS) => ({
-  id: randomUUID(),
-  mediaId: m.id,
-  timelineStartUs: Math.round(startS * 1e6),
-  sourceInUs: Math.round(inS * 1e6),
-  sourceOutUs: Math.round(outS * 1e6),
-  speed: 1,
-  volume: 1,
-  brightness: 1,
-  contrast: 1,
-});
-const [v2, v1, a1] = [track("video", "V2"), track("video", "V1"), track("audio", "A1")];
-v1.clips.push(clip(bars, 0, 0, 8), clip(still, 8, 0, 4));
-v2.clips.push(clip(vertical, 2, 0.5, 4.5));
-a1.clips.push(clip(tone, 1, 0, 6));
-const project = {
-  format: "novacut-project",
-  formatVersion: 1,
-  id: randomUUID(),
-  name: "Demonstração",
-  createdAt: now,
-  modifiedAt: now,
-  settings: { width: 1920, height: 1080, fps: 30, sampleRate: 48000, background: "#000000" },
-  media,
-  tracks: [v2, v1, a1],
-};
-writeFileSync(join(outDir, "demo.ncproj"), JSON.stringify(project, null, 2) + "\n");
-console.log("projeto:", join(outDir, "demo.ncproj"));
+/** Projeto com V1: barras 0–8 s + imagem 8–12 s · V2: vertical 2–6 s · A1: tom 1–7 s. */
+function buildProject(name) {
+  const now = new Date().toISOString();
+  const track = (kind, trackName) => ({ id: randomUUID(), kind, name: trackName, muted: false, hidden: false, clips: [] });
+  const media = files.map((f) => probe(join(outDir, f.name)));
+  const [bars, vertical, tone, still] = media;
+  const clip = (m, startS, inS, outS) => ({
+    id: randomUUID(),
+    mediaId: m.id,
+    timelineStartUs: Math.round(startS * 1e6),
+    sourceInUs: Math.round(inS * 1e6),
+    sourceOutUs: Math.round(outS * 1e6),
+    speed: 1,
+    volume: 1,
+    brightness: 1,
+    contrast: 1,
+  });
+  const [v2, v1, a1] = [track("video", "V2"), track("video", "V1"), track("audio", "A1")];
+  v1.clips.push(clip(bars, 0, 0, 8), clip(still, 8, 0, 4));
+  v2.clips.push(clip(vertical, 2, 0.5, 4.5));
+  a1.clips.push(clip(tone, 1, 0, 6));
+  return {
+    format: "novacut-project",
+    formatVersion: 1,
+    id: randomUUID(),
+    name,
+    createdAt: now,
+    modifiedAt: now,
+    settings: { width: 1920, height: 1080, fps: 30, sampleRate: 48000, background: "#000000" },
+    media,
+    tracks: [v2, v1, a1],
+  };
+}
+
+const write = (file, project) => writeFileSync(join(outDir, file), JSON.stringify(project, null, 2) + "\n");
+
+write("e2e.ncproj", buildProject("Teste E2E"));
+console.log("fixture E2E:", join(outDir, "e2e.ncproj"));
+
+if (existsSync(join(outDir, "demo.ncproj"))) {
+  console.log("demo.ncproj já existe; mantido sem alterações");
+} else {
+  write("demo.ncproj", buildProject("Demonstração"));
+  console.log("projeto:", join(outDir, "demo.ncproj"));
+}

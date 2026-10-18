@@ -17,6 +17,7 @@ import {
   zoomToFit,
 } from "../core/timeline/view";
 import type { EditAction } from "../state/document";
+import { isFormControl } from "./keyboard";
 
 const TRACK_HEIGHT = 52;
 const RULER_HEIGHT = 28;
@@ -235,7 +236,8 @@ export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, 
   // ---------- teclado ----------
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.altKey) return;
+      // Controles de formulário (texto, deslizantes) ficam com as próprias teclas.
+      if (isFormControl(e.target) || e.altKey) return;
       const key = e.key;
       const frame = frameDurationMicros(fps);
       let handled = true;

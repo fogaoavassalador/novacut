@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { newId, projectDurationUs } from "./core/project/project";
 import { formatTimecode, type Micros } from "./core/time";
 import { pruneSelection } from "./core/timeline/selection";
@@ -9,6 +9,9 @@ import { usePlayback } from "./state/usePlayback";
 import { useProjectDocument } from "./state/useProjectDocument";
 import { MediaLibrary } from "./ui/MediaLibrary";
 import { PreviewPlayer } from "./ui/PreviewPlayer";
+import { PropertiesPanel } from "./ui/PropertiesPanel";
+import { resumeAudio } from "./platform/audioGraph";
+import { isTextEntry } from "./ui/keyboard";
 import { StatusBar } from "./ui/StatusBar";
 import { Timeline } from "./ui/Timeline";
 import { TopBar } from "./ui/TopBar";
@@ -39,7 +42,13 @@ export default function App() {
   const [playheadUs, setPlayheadUs] = useState<Micros>(0);
 
   const durationUs = projectDurationUs(doc.project);
-  const { playing, toggle, pause } = usePlayback(durationUs, playheadUs, setPlayheadUs);
+  const playback = usePlayback(durationUs, playheadUs, setPlayheadUs);
+  const { playing, pause } = playback;
+  // O áudio só pode ser retomado dentro de um gesto do usuário (clique/tecla).
+  const toggle = useCallback(() => {
+    resumeAudio();
+    playback.toggle();
+  }, [playback.toggle]);
   const { sources, requestProxy } = useMediaSources(doc.project.media);
 
   // Clipes que deixaram de existir (desfazer, excluir, abrir outro projeto) saem da seleção.
@@ -55,7 +64,7 @@ export default function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== "Space" || e.ctrlKey || e.altKey) return;
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (isTextEntry(e.target)) return;
       e.preventDefault();
       toggle();
     };
@@ -136,10 +145,7 @@ export default function App() {
         <section className="panel" aria-label="Propriedades">
           <div className="panel-header">Propriedades</div>
           <div className="panel-body">
-            <div className="empty-state">
-              <strong>Nenhum clipe selecionado</strong>
-              Volume, velocidade, brilho e contraste aparecerão aqui.
-            </div>
+            <PropertiesPanel project={doc.project} selected={selected} onEdit={edit} />
           </div>
         </section>
       </main>

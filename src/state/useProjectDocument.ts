@@ -3,6 +3,7 @@ import { ask, message } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { createEmptyProject } from "../core/project/project";
 import type { MediaRef } from "../core/project/schema";
+import { isTextEntry } from "../ui/keyboard";
 import {
   getStartupProjectPath,
   ProjectFileError,
@@ -130,8 +131,9 @@ export function useProjectDocument() {
     const onKey = (e: KeyboardEvent) => {
       if (!e.ctrlKey || e.altKey) return;
       const key = e.key.toLowerCase();
-      // Em campos de texto, desfazer/refazer pertencem ao próprio campo.
-      const inText = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+      // Em campos de texto, desfazer/refazer pertencem ao próprio campo
+      // (controles como o deslizante não: lá o Ctrl+Z é do projeto).
+      const inText = isTextEntry(e.target);
       let run: (() => unknown) | null = null;
       if (key === "n") run = newProject;
       else if (key === "o") run = openProject;

@@ -9,6 +9,7 @@ import {
   findClip,
   minClipDurationUs,
   moveClip,
+  setClipProps,
   splitClip,
   trimClip,
   type OpResult,
@@ -170,6 +171,39 @@ describe("splitClip", () => {
     p0.tracks[1].clips[0] = { ...p0.tracks[1].clips[0], volume: 0.5, brightness: 1.2 };
     const p = unwrap(splitClip(p0, "c", 4 * S, "d"));
     expect(clip(p, "d")).toMatchObject({ volume: 0.5, brightness: 1.2 });
+  });
+});
+
+describe("setClipProps", () => {
+  const two = () => {
+    let p = unwrap(addClip(base(), { clipId: "a", mediaId: "vid", startUs: 0, sourceOutUs: 4 * S }));
+    p = unwrap(addClip(p, { clipId: "b", mediaId: "vid", startUs: 6 * S, sourceOutUs: 2 * S }));
+    return p;
+  };
+
+  it("altera volume, brilho e contraste de vários clipes", () => {
+    const p = unwrap(setClipProps(two(), ["a", "b"], { volume: 2, brightness: 1.2, contrast: 0.8 }));
+    for (const id of ["a", "b"]) expect(clip(p, id)).toMatchObject({ volume: 2, brightness: 1.2, contrast: 0.8 });
+  });
+
+  it("acelerar encurta o clipe e mantém o trecho da mídia", () => {
+    const p = unwrap(setClipProps(two(), ["a"], { speed: 2 }));
+    expect(clip(p, "a")).toMatchObject({ sourceInUs: 0, sourceOutUs: 4 * S, speed: 2 });
+    expect(clipEndUs(clip(p, "a"))).toBe(2 * S);
+  });
+
+  it("desacelerar até encostar no vizinho é permitido; passar disso é recusado", () => {
+    expect(clipEndUs(clip(unwrap(setClipProps(two(), ["a"], { speed: 4 / 6 })), "a"))).toBe(6 * S);
+    const r = setClipProps(two(), ["a"], { speed: 0.5 });
+    expect(r).toEqual({ ok: false, error: "não há espaço na faixa para o clipe mais lento; abra espaço depois dele" });
+  });
+
+  it("recusa valores fora dos limites e ids inexistentes", () => {
+    expect(setClipProps(two(), ["a"], { volume: 5 }).ok).toBe(false);
+    expect(setClipProps(two(), ["a"], { speed: 0 }).ok).toBe(false);
+    expect(setClipProps(two(), ["a"], { brightness: Number.NaN }).ok).toBe(false);
+    expect(setClipProps(two(), ["nada"], { volume: 1 }).ok).toBe(false);
+    expect(setClipProps(two(), [], { volume: 1 }).ok).toBe(false);
   });
 });
 

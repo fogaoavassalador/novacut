@@ -32,15 +32,25 @@ Os scripts em `scripts/` dirigem o app real pelo protocolo de depuração do Web
 - `e2e-timeline.mjs`: selecionar, arrastar, cortar, dividir, excluir, desfazer, zoom.
 - `e2e-preview.mjs`: decodificação via protocolo `asset`, posição de cada mídia no playhead,
   ordem das camadas, reprodução em sincronia, parada no fim e proxy automático de GIF.
+- `e2e-properties.mjs`: painel de propriedades (habilitação por tipo de mídia, velocidade e
+  duração, recusa sem espaço, controle deslizante = 1 passo de desfazer) e **nível de áudio
+  medido na saída** (200% = 2× o nível de 100%). Toca cerca de 2 s de áudio.
+
+Os testes usam o fixture `samples/e2e.ncproj` (regenerado por `npm run samples`) e recarregam a
+página. Rode-os numa **instância isolada**, com pasta de dados própria do WebView2, para não
+afetar uma janela do NovaCut que você esteja usando:
 
 ```powershell
 npm run samples
 npm run dev                                   # em outro terminal
 cargo build --manifest-path src-tauri/Cargo.toml
-$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--remote-debugging-port=9333 --remote-debugging-address=127.0.0.1"
-src-tauri\target\debug\novacut.exe samples\demo.ncproj
+$env:WEBVIEW2_USER_DATA_FOLDER="$env:TEMP\novacut-e2e-webview"
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--remote-debugging-port=9334 --remote-debugging-address=127.0.0.1"
+src-tauri\target\debug\novacut.exe samples\e2e.ncproj
+$env:CDP_PORT="9334"
 node scripts/e2e-timeline.mjs
 node scripts/e2e-preview.mjs
+node scripts/e2e-properties.mjs
 ```
 
 ## Pré-visualização
@@ -52,9 +62,20 @@ node scripts/e2e-preview.mjs
   exportação.
 - Formatos que o WebView2 não toca (GIF, ProRes, alguns MKV…) recebem um **proxy** H.264 de até
   1280 px em `%LOCALAPPDATA%\com.novacut.app\proxies`, usado só na pré-visualização.
+- O áudio passa pelo Web Audio (elemento → ganho do clipe 0–400% → master → saída). Os elementos
+  usam `crossOrigin="anonymous"`: sem isso o WebView entrega silêncio ao grafo para mídias do
+  protocolo `asset` (verificado com um tom de 220 Hz).
 - Limitações atuais: o relógio é o do sistema (vídeos são corrigidos se se afastarem mais de
-  120 ms); volume acima de 100% ainda não é audível na pré-visualização; o cache de proxies não é
-  limpo automaticamente.
+  120 ms); o cache de proxies não é limpo automaticamente.
+
+## Painel de propriedades
+
+Volume (0–400%), velocidade (0,1×–16×; deslizante 0,25×–4×), brilho e contraste (0–200%) do clipe
+selecionado — ou de todos os selecionados. Cada arraste de controle deslizante é um único passo de
+desfazer; campos numéricos aplicam ao pressionar Enter ou sair do campo. Mudar a velocidade muda a
+duração na timeline; se o clipe mais lento invadir o vizinho, a mudança é recusada com aviso.
+Controles que não se aplicam ficam desabilitados (volume sem som, velocidade em imagem, brilho e
+contraste em áudio).
 
 ## Atalhos da timeline
 
@@ -128,6 +149,7 @@ e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `
       bordas, dividir no playhead, excluir, zoom e rolagem, playhead pela régua
 - [x] Etapa 6 — motor de pré-visualização: reprodução sincronizada (Espaço), camadas, áudio,
       velocidade, brilho/contraste por CSS, proxies automáticos
-- [ ] Etapa 7 — propriedades: volume, velocidade, brilho, contraste
+- [x] Etapa 7 — painel de propriedades: volume (com ganho real acima de 100% na pré-visualização),
+      velocidade, brilho e contraste
 - [ ] Etapa 8 — exportação MP4
 - [ ] Etapa 9 — empacotamento com FFmpeg e licenças

@@ -195,6 +195,49 @@ export function splitClip(project: Project, clipId: string, atUs: Micros, newCli
   return ok(withTrack(project, { ...track, clips: [...track.clips.map((c) => (c.id === clipId ? left : c)), right] }));
 }
 
+/** Propriedades ajustáveis no painel, com os limites aceitos pelo app. */
+export type ClipProps = Pick<Clip, "volume" | "speed" | "brightness" | "contrast">;
+export const PROP_LIMITS: Record<keyof ClipProps, { min: number; max: number }> = {
+  volume: { min: 0, max: 4 },
+  speed: { min: 0.1, max: 16 },
+  brightness: { min: 0, max: 2 },
+  contrast: { min: 0, max: 2 },
+};
+
+/**
+ * Altera propriedades de um ou mais clipes. Mudar a velocidade muda a duração
+ * na timeline (o trecho da mídia é o mesmo); se o clipe mais lento invadir o
+ * vizinho, a operação é recusada em vez de empurrar outros clipes.
+ */
+export function setClipProps(project: Project, clipIds: readonly string[], props: Partial<ClipProps>): OpResult {
+  if (!clipIds.length) return fail("nenhum clipe selecionado");
+  for (const [k, v] of Object.entries(props) as [keyof ClipProps, number][]) {
+    const lim = PROP_LIMITS[k];
+    if (!Number.isFinite(v) || v < lim.min || v > lim.max) return fail(`valor inválido para ${k}: ${v}`);
+  }
+  const ids = new Set(clipIds);
+  if (![...ids].every((id) => findClip(project, id))) return fail("clipe não encontrado");
+
+  const next = {
+    ...project,
+    tracks: project.tracks.map((t) => {
+      if (!t.clips.some((c) => ids.has(c.id))) return t;
+      return { ...t, clips: t.clips.map((c) => (ids.has(c.id) ? { ...c, ...props } : c)) };
+    }),
+  };
+  if ("speed" in props) {
+    const min = minClipDurationUs(project);
+    for (const t of next.tracks)
+      for (const c of t.clips) {
+        if (!ids.has(c.id)) continue;
+        if (clipDurationUs(c) < min) return fail("nessa velocidade o clipe ficaria menor que um quadro");
+        if (!rangeIsFree(t, c.timelineStartUs, clipEndUs(c), c.id))
+          return fail("não há espaço na faixa para o clipe mais lento; abra espaço depois dele");
+      }
+  }
+  return ok(next);
+}
+
 export function deleteClips(project: Project, clipIds: readonly string[]): OpResult {
   const ids = new Set(clipIds);
   if (!clipIds.some((id) => findClip(project, id))) return fail("nenhum clipe encontrado");

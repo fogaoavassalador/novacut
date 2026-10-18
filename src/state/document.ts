@@ -1,7 +1,16 @@
 import { isMediaInUse, pathKey } from "../core/media/media";
 import { createEmptyProject } from "../core/project/project";
 import { PROJECT_EXTENSION, type MediaRef, type Project } from "../core/project/schema";
-import { addClip, deleteClips, moveClip, splitClip, trimClip, type AddClipParams } from "../core/timeline/ops";
+import {
+  addClip,
+  deleteClips,
+  moveClip,
+  setClipProps,
+  splitClip,
+  trimClip,
+  type AddClipParams,
+  type ClipProps,
+} from "../core/timeline/ops";
 import type { Micros } from "../core/time";
 
 /** Quantos estados o desfazer guarda. */
@@ -22,6 +31,8 @@ export interface ProjectDocument {
   future: Project[];
   /** Motivo da última edição recusada, para exibir ao usuário. */
   lastError: string | null;
+  /** Chave de agrupamento da última edição aplicada (ver `setClipProps`). */
+  lastCoalesceKey: string | null;
 }
 
 /** Ações que alteram o projeto e entram no histórico. */
@@ -36,6 +47,11 @@ export type EditAction =
   | { type: "trimClip"; clipId: string; edge: "start" | "end"; atUs: Micros }
   | { type: "splitClip"; clipId: string; atUs: Micros; newClipId: string }
   | { type: "deleteClips"; clipIds: string[] }
+  /**
+   * Ajusta propriedades dos clipes. Edições consecutivas com a mesma
+   * `coalesceKey` (ex.: um arraste de controle deslizante) viram um único passo.
+   */
+  | { type: "setClipProps"; clipIds: string[]; props: Partial<ClipProps>; coalesceKey?: string }
   /** Várias edições como um único passo de desfazer; se uma falhar, nenhuma é aplicada. */
   | { type: "batch"; actions: EditAction[] };
 
@@ -51,7 +67,16 @@ export type DocumentAction =
 export const DEFAULT_PROJECT_NAME = "Projeto sem título";
 
 function fresh(project: Project, filePath: string | null): ProjectDocument {
-  return { project, filePath, savedProject: project, dirty: false, past: [], future: [], lastError: null };
+  return {
+    project,
+    filePath,
+    savedProject: project,
+    dirty: false,
+    past: [],
+    future: [],
+    lastError: null,
+    lastCoalesceKey: null,
+  };
 }
 
 export function initialDocument(): ProjectDocument {
@@ -91,6 +116,8 @@ function applyEdit(project: Project, action: EditAction): Project | null | strin
       return unwrap(splitClip(project, action.clipId, action.atUs, action.newClipId));
     case "deleteClips":
       return unwrap(deleteClips(project, action.clipIds));
+    case "setClipProps":
+      return unwrap(setClipProps(project, action.clipIds, action.props));
     case "batch": {
       let current = project;
       for (const a of action.actions) {
@@ -107,8 +134,14 @@ function unwrap(r: { ok: true; project: Project } | { ok: false; error: string }
   return r.ok ? r.project : r.error;
 }
 
-function withProject(doc: ProjectDocument, project: Project, past: Project[], future: Project[]): ProjectDocument {
-  return { ...doc, project, past, future, dirty: project !== doc.savedProject, lastError: null };
+function withProject(
+  doc: ProjectDocument,
+  project: Project,
+  past: Project[],
+  future: Project[],
+  lastCoalesceKey: string | null = null,
+): ProjectDocument {
+  return { ...doc, project, past, future, dirty: project !== doc.savedProject, lastError: null, lastCoalesceKey };
 }
 
 export function documentReducer(doc: ProjectDocument, action: DocumentAction): ProjectDocument {
@@ -136,8 +169,11 @@ export function documentReducer(doc: ProjectDocument, action: DocumentAction): P
       const next = applyEdit(doc.project, action);
       if (next === null) return doc;
       if (typeof next === "string") return { ...doc, lastError: next };
-      const past = [...doc.past, doc.project].slice(-HISTORY_LIMIT);
-      return withProject(doc, next, past, []);
+      const key = action.type === "setClipProps" ? (action.coalesceKey ?? null) : null;
+      // Mesma chave da edição anterior: substitui o estado atual sem novo passo de desfazer.
+      const past =
+        key !== null && key === doc.lastCoalesceKey ? doc.past : [...doc.past, doc.project].slice(-HISTORY_LIMIT);
+      return withProject(doc, next, past, [], key);
     }
   }
 }

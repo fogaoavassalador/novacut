@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { activeClipsAt, clipsToMount, cssFilter, planElement, type ActiveClip } from "../core/preview/composition";
 import type { MediaRef, Project } from "../core/project/schema";
 import { frameDurationMicros, type Micros, US_PER_SECOND } from "../core/time";
+import { clipGain, resumeAudio } from "../platform/audioGraph";
 import type { MediaSource } from "../state/useMediaSources";
 
 /** Clipes começando em até 2 s são montados antes para trocar sem engasgo. */
@@ -43,10 +44,10 @@ export function PreviewPlayer({ project, playheadUs, playing, sources, onUnsuppo
         frameUs,
       });
       el.playbackRate = a.clip.speed;
-      // Ganho acima de 1 ainda não é reproduzido na pré-visualização (limite do <video>).
-      el.volume = Math.min(1, a.clip.volume);
-      el.muted = !audible(a);
+      // Volume (0–400%) aplicado no grafo de áudio; o elemento fica em 100%.
+      clipGain(el).gain.value = audible(a) ? a.clip.volume : 0;
       if (plan.seekToUs !== null && !(plan.play && el.seeking)) el.currentTime = plan.seekToUs / US_PER_SECOND;
+      if (plan.play) resumeAudio();
       if (plan.play && el.paused) el.play().catch(() => {});
       else if (!plan.play && !el.paused) el.pause();
     }
@@ -93,6 +94,7 @@ export function PreviewPlayer({ project, playheadUs, playing, sources, onUnsuppo
               src={src.url}
               style={style}
               preload="auto"
+              crossOrigin="anonymous"
               playsInline
               data-clip-id={a.clip.id}
               onError={(e) => {
@@ -106,6 +108,7 @@ export function PreviewPlayer({ project, playheadUs, playing, sources, onUnsuppo
             ref={register(a.clip.id)}
             src={src.url}
             preload="auto"
+              crossOrigin="anonymous"
             data-clip-id={a.clip.id}
             onError={(e) => {
               if (e.currentTarget.error?.code === MEDIA_ERR_SRC_NOT_SUPPORTED && !src.proxied) onUnsupported(a.media);
