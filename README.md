@@ -115,8 +115,16 @@ O `beforeBuildCommand` roda `npm run build`, `npm run prepare-ffmpeg` e `npm run
   SHA-256 e **recusa builds GPL/nonfree**. As DLLs separadas permitem trocar as bibliotecas (LGPL).
 - **`notices`** gera em `src-tauri/licenses/`: `THIRD_PARTY_NOTICES.txt` (dependências JS de
   produção e crates Rust do executável, com textos de licença), `FFMPEG-NOTICE.txt` (versão,
-  configuração, SHA-256 e onde obter o código-fonte), `FFmpeg-LICENSE.txt` (LGPLv3) e
-  `GPL-3.0.txt` (exigida pela LGPLv3; cópia oficial conferida por SHA-256).
+  configuração, SHA-256 e onde obter o código-fonte), `FFMPEG-THIRD-PARTY.txt` (licenças das
+  bibliotecas externas do FFmpeg), `FFmpeg-LICENSE.txt` (LGPLv3) e `GPL-3.0.txt` (exigida pela
+  LGPLv3; cópia oficial conferida por SHA-256).
+- **`third_party_licenses/`** guarda, versionados, os textos de licença que não vêm nos pacotes: as
+  79 bibliotecas compiladas no FFmpeg (as 43 de `--enable-lib*`, as dependências delas e o código
+  que embutem, como glslang e highway), cada uma no commit dos scripts do BtbN FFmpeg-Builds usado
+  pelo build, e 5 crates Rust publicados sem o arquivo. `sources.json` registra origem, commit e
+  SHA-256 de cada texto; o `notices` confere os hashes e avisa se faltar texto para alguma opção
+  `--enable-` do FFmpeg. Ao trocar o FFmpeg, atualize os commits em `sources.json` pelos
+  `scripts.d` do BtbN e rode `npm run fetch-licenses`, que baixa da internet só os textos ausentes.
 - O app procura o FFmpeg nesta ordem: `NOVACUT_FFMPEG_DIR` → pasta `ffmpeg` instalada com o app →
   PATH. A barra de status mostra a origem.
 - Instalador NSIS por usuário (sem administrador), em português do Brasil; ícone próprio gerado de
@@ -126,9 +134,16 @@ O `beforeBuildCommand` roda `npm run build`, `npm run prepare-ffmpeg` e `npm run
 
 `npm run notices` lista como `PENDENTE`:
 
-- os textos de licença das bibliotecas externas compiladas no FFmpeg (dav1d, openh264, harfbuzz…;
-  43 no build atual), que o pacote BtbN não inclui;
-- 5 crates Rust que declaram licença (MIT/BSD/MPL) mas não trazem o arquivo de texto;
+- **FFTW3 (GPL) dentro do FFmpeg "LGPL"**: o BtbN compila o chromaprint com `-DFFT_LIB=fftw3`, e o
+  FFTW3 (GPLv2+) vai ligado em `avformat-62.dll`. Por isso o FFmpeg embutido não é só LGPLv3. Falta
+  decidir: distribuir os binários do FFmpeg sob a GPLv3 ou usar um build sem chromaprint;
+- os crates Rust compilados no rav1e (o `Cargo.lock` do commit), cujos textos ainda não estão em
+  `third_party_licenses/`.
+
+Fora do `notices`:
+
+- o nv-codec-headers (`--enable-ffnvcodec`) não tem arquivo de licença; o texto MIT está só nos
+  comentários dos cabeçalhos;
 - a licença do próprio NovaCut (ainda não definida);
 - revisão jurídica sobre patentes de H.264/AAC e sobre a licença de patentes do OpenH264;
 - assinatura de código: o instalador não é assinado, então o Windows SmartScreen avisa ao executá-lo;

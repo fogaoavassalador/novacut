@@ -1,0 +1,1409 @@
+{
+  "_comment": "Textos de licença de terceiros que não vêm nos pacotes. Baixados por scripts/fetch-licenses.mjs e incluídos por scripts/gen-notices.mjs. Versões do FFmpeg: scripts.d do BtbN FFmpeg-Builds no commit btbnCommit.",
+  "ffmpeg": {
+    "build": "n8.1.2-50-g1a748fe2cd-20260831 (win64-lgpl-shared-8.1)",
+    "btbnRelease": "autobuild-2026-08-31-13-27",
+    "btbnCommit": "8267213e26c1031621e6e1210fe3aa4867214f6a",
+    "libraries": [
+      {
+        "id": "xml2",
+        "kind": "lib",
+        "repo": "https://github.com/GNOME/libxml2.git",
+        "commit": "c63248941708bc1d2e3a4292954593312212f6ca",
+        "enables": [
+          "libxml2"
+        ],
+        "files": [
+          {
+            "name": "Copyright",
+            "url": "https://raw.githubusercontent.com/GNOME/libxml2/c63248941708bc1d2e3a4292954593312212f6ca/Copyright",
+            "sha256": "5d4873884a890122a4b9b20ad56ac6f7da1d796a5bfcf04a427970ac96217626"
+          }
+        ]
+      },
+      {
+        "id": "vmaf",
+        "kind": "lib",
+        "repo": "https://github.com/Netflix/vmaf.git",
+        "commit": "e80d6c593e6e2327687dccd00b7cc9c91036d79f",
+        "enables": [
+          "libvmaf"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/Netflix/vmaf/e80d6c593e6e2327687dccd00b7cc9c91036d79f/LICENSE",
+            "sha256": "a6fdb51d02b9dfe198e55534bb8047fe6d756eda117f4ff83de98f92c1952710"
+          }
+        ]
+      },
+      {
+        "id": "harfbuzz",
+        "kind": "lib",
+        "repo": "https://github.com/harfbuzz/harfbuzz.git",
+        "commit": "d8dabe2594596c656b54c3b0072f3aa3093f30a9",
+        "enables": [
+          "libharfbuzz"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/harfbuzz/harfbuzz/d8dabe2594596c656b54c3b0072f3aa3093f30a9/COPYING",
+            "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64"
+          }
+        ]
+      },
+      {
+        "id": "freetype",
+        "kind": "lib",
+        "repo": "https://gitlab.freedesktop.org/freetype/freetype.git",
+        "commit": "9e9d3b73f31367dbb4261f93c727a277f6632c77",
+        "enables": [
+          "libfreetype"
+        ],
+        "files": [
+          {
+            "name": "LICENSE.TXT",
+            "url": "https://gitlab.freedesktop.org/api/v4/projects/freetype%2Ffreetype/repository/files/LICENSE.TXT/raw?ref=9e9d3b73f31367dbb4261f93c727a277f6632c77",
+            "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b"
+          }
+        ]
+      },
+      {
+        "id": "fribidi",
+        "kind": "lib",
+        "repo": "https://github.com/fribidi/fribidi.git",
+        "commit": "04a8cb7a3674717e509c79cd6ee3e127d0c75f4c",
+        "enables": [
+          "libfribidi"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/fribidi/fribidi/04a8cb7a3674717e509c79cd6ee3e127d0c75f4c/COPYING",
+            "sha256": "32434afcc8666ba060e111d715bfdb6c2d5dd8a35fa4d3ab8ad67d8f850d2f2b"
+          }
+        ]
+      },
+      {
+        "id": "shaderc",
+        "kind": "lib",
+        "repo": "https://github.com/google/shaderc.git",
+        "commit": "7060a6615a1c6e2515e696651eea685524ecadb5",
+        "enables": [
+          "libshaderc"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/google/shaderc/7060a6615a1c6e2515e696651eea685524ecadb5/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+          }
+        ]
+      },
+      {
+        "id": "vorbis",
+        "kind": "lib",
+        "repo": "https://github.com/xiph/vorbis.git",
+        "commit": "1b75110b5a2754ba1931d82dd83cb822b266a21d",
+        "enables": [
+          "libvorbis"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/xiph/vorbis/1b75110b5a2754ba1931d82dd83cb822b266a21d/COPYING",
+            "sha256": "ec1815db59fcd302846df949d7424876cb2e2dc5ed1606c5fb0b36787b1cf43a"
+          }
+        ]
+      },
+      {
+        "id": "lcevc-dec",
+        "kind": "lib",
+        "repo": "https://github.com/v-novaltd/LCEVCdec.git",
+        "commit": "a254bd474649e5dcd8182689ac414420bfe8d8c3",
+        "enables": [
+          "liblcevc-dec"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/v-novaltd/LCEVCdec/a254bd474649e5dcd8182689ac414420bfe8d8c3/COPYING",
+            "sha256": "3afa5369b4fb44e18280b6e0e275971f78bc6eaf5f53553f41f2483fd8b1267e"
+          },
+          {
+            "name": "LICENSE.md",
+            "url": "https://raw.githubusercontent.com/v-novaltd/LCEVCdec/a254bd474649e5dcd8182689ac414420bfe8d8c3/LICENSE.md",
+            "sha256": "14358b0ecf6e7036c211c10f0f25563c94483dee7b8c7c954e09e10f3771d0af"
+          }
+        ]
+      },
+      {
+        "id": "aom",
+        "kind": "lib",
+        "repo": "https://aomedia.googlesource.com/aom",
+        "commit": "95f420511f698ea201e8928464704dc30da4b568",
+        "enables": [
+          "libaom"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://aomedia.googlesource.com/aom/+/95f420511f698ea201e8928464704dc30da4b568/LICENSE?format=TEXT",
+            "sha256": "4764a286d8b2faeaf42f4418e7d7a28d58fc8fd4d00a3d0a7f44b0a4099de7f2"
+          },
+          {
+            "name": "PATENTS",
+            "url": "https://aomedia.googlesource.com/aom/+/95f420511f698ea201e8928464704dc30da4b568/PATENTS?format=TEXT",
+            "sha256": "661fb8e504744e95587b556b94a58343448300606a41bea8c7a9b97125696e61"
+          }
+        ]
+      },
+      {
+        "id": "aribb24",
+        "kind": "lib",
+        "repo": "https://github.com/nkoriyama/aribb24.git",
+        "commit": "5e9be272f96e00f15a2f3c5f8ba7e124862aec38",
+        "enables": [
+          "libaribb24"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/nkoriyama/aribb24/5e9be272f96e00f15a2f3c5f8ba7e124862aec38/COPYING",
+            "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+          }
+        ]
+      },
+      {
+        "id": "dav1d",
+        "kind": "lib",
+        "repo": "https://code.videolan.org/videolan/dav1d.git",
+        "commit": "54706fc6bc0cdecab7e9593974a4039cc038fca7",
+        "enables": [
+          "libdav1d"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://code.videolan.org/api/v4/projects/videolan%2Fdav1d/repository/files/COPYING/raw?ref=54706fc6bc0cdecab7e9593974a4039cc038fca7",
+            "sha256": "dd92c3c2247c5651606fc23a5e2d6a1ebc5ace9a3e49cbde0e12f05ad1cb1ee5"
+          }
+        ]
+      },
+      {
+        "id": "gme",
+        "kind": "lib",
+        "repo": "https://github.com/libgme/game-music-emu.git",
+        "commit": "fe8da4b6d3876d7542c2fb69d94487e19836d678",
+        "enables": [
+          "libgme"
+        ],
+        "files": [
+          {
+            "name": "license.gpl2.txt",
+            "url": "https://raw.githubusercontent.com/libgme/game-music-emu/fe8da4b6d3876d7542c2fb69d94487e19836d678/license.gpl2.txt",
+            "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+          },
+          {
+            "name": "license.txt",
+            "url": "https://raw.githubusercontent.com/libgme/game-music-emu/fe8da4b6d3876d7542c2fb69d94487e19836d678/license.txt",
+            "sha256": "d2efc89fbb7533572a472d34e07964951810a3a4f8d3159ecc2dcaa1452c5c26"
+          }
+        ]
+      },
+      {
+        "id": "kvazaar",
+        "kind": "lib",
+        "repo": "https://github.com/ultravideo/kvazaar.git",
+        "commit": "d6815293f34a094e26ba6c50b8644660ddc13e09",
+        "enables": [
+          "libkvazaar"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/ultravideo/kvazaar/d6815293f34a094e26ba6c50b8644660ddc13e09/LICENSE",
+            "sha256": "3c1dc3d7f8a3d08c14f4fbe9942f45764d8a21a3296e8d83446f33fd65f21c38"
+          },
+          {
+            "name": "LICENSE.EXT.greatest",
+            "url": "https://raw.githubusercontent.com/ultravideo/kvazaar/d6815293f34a094e26ba6c50b8644660ddc13e09/LICENSE.EXT.greatest",
+            "sha256": "16f569c87d5ec20b7474b55ee0a8877b8f8b4dc13f9567ebe0b8fe8afdeb34d2"
+          }
+        ]
+      },
+      {
+        "id": "aribcaption",
+        "kind": "lib",
+        "repo": "https://github.com/xqq/libaribcaption.git",
+        "commit": "c64c23b8905ba514b87c9789269e9f66f949ffe0",
+        "enables": [
+          "libaribcaption"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/xqq/libaribcaption/c64c23b8905ba514b87c9789269e9f66f949ffe0/LICENSE",
+            "sha256": "5149f1ce4fe89190d86bfb440456701a3a7406fc2b19ef0d8b57661f62b32c04"
+          }
+        ]
+      },
+      {
+        "id": "ass",
+        "kind": "lib",
+        "repo": "https://github.com/libass/libass.git",
+        "commit": "3087d2b2ffda76602a17f9b09d25cb8addc8d313",
+        "enables": [
+          "libass"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/libass/libass/3087d2b2ffda76602a17f9b09d25cb8addc8d313/COPYING",
+            "sha256": "f7e30699d02798351e7f839e3d3bfeb29ce65e44efa7735c225464c4fd7dfe9c"
+          }
+        ]
+      },
+      {
+        "id": "bluray",
+        "kind": "lib",
+        "repo": "https://code.videolan.org/videolan/libbluray.git",
+        "commit": "065247e5ef40ccf39857db81e2c1368354a23ef8",
+        "enables": [
+          "libbluray"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://code.videolan.org/api/v4/projects/videolan%2Flibbluray/repository/files/COPYING/raw?ref=065247e5ef40ccf39857db81e2c1368354a23ef8",
+            "sha256": "b3aa400aca6d2ba1f0bd03bd98d03d1fe7489a3bbb26969d72016360af8a5c9d"
+          }
+        ]
+      },
+      {
+        "id": "jxl",
+        "kind": "lib",
+        "repo": "https://github.com/libjxl/libjxl.git",
+        "commit": "d089091afeb7b00b3d0fec6f019d35eaa3b2b410",
+        "enables": [
+          "libjxl"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/libjxl/libjxl/d089091afeb7b00b3d0fec6f019d35eaa3b2b410/LICENSE",
+            "sha256": "8405932022a556380c2d8c272eff154a923feb197233f348ce5f7334fb0a5ede"
+          },
+          {
+            "name": "PATENTS",
+            "url": "https://raw.githubusercontent.com/libjxl/libjxl/d089091afeb7b00b3d0fec6f019d35eaa3b2b410/PATENTS",
+            "sha256": "91915f8ae056a68a3c5bdf05d9f6f78bb6903e27a8ca3a8434c9e4ac87300575"
+          }
+        ]
+      },
+      {
+        "id": "mp3lame",
+        "kind": "lib",
+        "repo": "https://svn.code.sf.net/p/lame/svn/trunk/lame",
+        "commit": "r6761",
+        "enables": [
+          "libmp3lame"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://svn.code.sf.net/p/lame/svn/!svn/bc/6761/trunk/lame/COPYING",
+            "sha256": "e64f9c5a18f56828c10a575df13ade641aa3af4512a7afe6c411256943b57aaf"
+          },
+          {
+            "name": "LICENSE",
+            "url": "https://svn.code.sf.net/p/lame/svn/!svn/bc/6761/trunk/lame/LICENSE",
+            "sha256": "5c1f8d44f1eacbea3e1c31ff6ee11a4e1690ccbed4ee4af16de3b6eb61dc69a8"
+          }
+        ]
+      },
+      {
+        "id": "opus",
+        "kind": "lib",
+        "repo": "https://github.com/xiph/opus.git",
+        "commit": "3da9f7a6db1c05c3996cb363a9d1931a978bf1be",
+        "enables": [
+          "libopus"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/xiph/opus/3da9f7a6db1c05c3996cb363a9d1931a978bf1be/COPYING",
+            "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551"
+          },
+          {
+            "name": "LICENSE_PLEASE_READ.txt",
+            "url": "https://raw.githubusercontent.com/xiph/opus/3da9f7a6db1c05c3996cb363a9d1931a978bf1be/LICENSE_PLEASE_READ.txt",
+            "sha256": "7efb4989e0cd1b256229bdf2f09300c5d14e35db0e7476bfb87fac243498273d"
+          }
+        ]
+      },
+      {
+        "id": "placebo",
+        "kind": "lib",
+        "repo": "https://code.videolan.org/videolan/libplacebo.git",
+        "commit": "22ee762e8e0890fc54068beb670310f0edce7263",
+        "enables": [
+          "libplacebo"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://code.videolan.org/api/v4/projects/videolan%2Flibplacebo/repository/files/LICENSE/raw?ref=22ee762e8e0890fc54068beb670310f0edce7263",
+            "sha256": "b3aa400aca6d2ba1f0bd03bd98d03d1fe7489a3bbb26969d72016360af8a5c9d"
+          }
+        ]
+      },
+      {
+        "id": "rist",
+        "kind": "lib",
+        "repo": "https://code.videolan.org/rist/librist.git",
+        "commit": "4f45ef8f78983892d52ccd52d9f675435b23738f",
+        "enables": [
+          "librist"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://code.videolan.org/api/v4/projects/rist%2Flibrist/repository/files/COPYING/raw?ref=4f45ef8f78983892d52ccd52d9f675435b23738f",
+            "sha256": "b9841591a3452ee30033d8e3586c7b1244a0b2fc1dc6cb04576957c313cb2792"
+          }
+        ]
+      },
+      {
+        "id": "ssh",
+        "kind": "lib",
+        "repo": "https://gitlab.com/libssh/libssh-mirror.git",
+        "commit": "1dc52926c54b59ea7a3350a59a476bb76da3ff33",
+        "enables": [
+          "libssh"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://gitlab.com/api/v4/projects/libssh%2Flibssh-mirror/repository/files/COPYING/raw?ref=1dc52926c54b59ea7a3350a59a476bb76da3ff33",
+            "sha256": "1656186e951db1c010a8485481fa94587f7e53a26d24976bef97945ad0c4df5a"
+          }
+        ]
+      },
+      {
+        "id": "theora",
+        "kind": "lib",
+        "repo": "https://github.com/xiph/theora.git",
+        "commit": "28fd5ec77f0ad0e07a371cef1047828116f6bd8a",
+        "enables": [
+          "libtheora"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/xiph/theora/28fd5ec77f0ad0e07a371cef1047828116f6bd8a/COPYING",
+            "sha256": "8417fad7da775735564e209484a2e011e0fa201e94f01fdbee6e4977e478e6fc"
+          },
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/xiph/theora/28fd5ec77f0ad0e07a371cef1047828116f6bd8a/LICENSE",
+            "sha256": "2c902950c73a63cd285dc0c36573de9c5fefe66d49312949c51d941f33e92932"
+          }
+        ]
+      },
+      {
+        "id": "vpx",
+        "kind": "lib",
+        "repo": "https://chromium.googlesource.com/webm/libvpx",
+        "commit": "9cc8e1c18024d6b64422ecb7fdd7a43c8e873908",
+        "enables": [
+          "libvpx"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://chromium.googlesource.com/webm/libvpx/+/9cc8e1c18024d6b64422ecb7fdd7a43c8e873908/LICENSE?format=TEXT",
+            "sha256": "8267348d5af1262c11d1a08de2f5afc77457755f1ac658627dd9acf71011d615"
+          },
+          {
+            "name": "PATENTS",
+            "url": "https://chromium.googlesource.com/webm/libvpx/+/9cc8e1c18024d6b64422ecb7fdd7a43c8e873908/PATENTS?format=TEXT",
+            "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
+          }
+        ]
+      },
+      {
+        "id": "webp",
+        "kind": "lib",
+        "repo": "https://chromium.googlesource.com/webm/libwebp",
+        "commit": "ba8358578ecbc4c75f0723163275de00dec0c704",
+        "enables": [
+          "libwebp"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://chromium.googlesource.com/webm/libwebp/+/ba8358578ecbc4c75f0723163275de00dec0c704/COPYING?format=TEXT",
+            "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf"
+          },
+          {
+            "name": "PATENTS",
+            "url": "https://chromium.googlesource.com/webm/libwebp/+/ba8358578ecbc4c75f0723163275de00dec0c704/PATENTS?format=TEXT",
+            "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
+          }
+        ]
+      },
+      {
+        "id": "zmq",
+        "kind": "lib",
+        "repo": "https://github.com/zeromq/libzmq.git",
+        "commit": "46493370217ac135246617fa2f6ac819d8b61bfc",
+        "enables": [
+          "libzmq"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/zeromq/libzmq/46493370217ac135246617fa2f6ac819d8b61bfc/LICENSE",
+            "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+          }
+        ]
+      },
+      {
+        "id": "vpl",
+        "kind": "lib",
+        "repo": "https://github.com/intel/libvpl.git",
+        "commit": "674d015bcb294bc39fa276e99a652ea045423e82",
+        "enables": [
+          "libvpl"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/intel/libvpl/674d015bcb294bc39fa276e99a652ea045423e82/LICENSE",
+            "sha256": "bf1cfac2e2792b6e1e995ce103d70796aecaf2ec7e4c5fe5474f7acec7b4a677"
+          }
+        ]
+      },
+      {
+        "id": "oapv",
+        "kind": "lib",
+        "repo": "https://github.com/AcademySoftwareFoundation/openapv.git",
+        "commit": "d625af974550427e638574db61c270fe7f8c5a73",
+        "enables": [
+          "liboapv"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/AcademySoftwareFoundation/openapv/d625af974550427e638574db61c270fe7f8c5a73/LICENSE",
+            "sha256": "7ad8e53c0c3e24e7ba64dbcad5e7706108f3dc67cf6515ef761adac0a39dab25"
+          }
+        ]
+      },
+      {
+        "id": "opencore-amr",
+        "kind": "lib",
+        "repo": "https://git.code.sf.net/p/opencore-amr/code",
+        "commit": "7dba8c32238418ce0b316a852b2224df586ca896",
+        "enables": [
+          "libopencore-amrnb",
+          "libopencore-amrwb"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://sourceforge.net/p/opencore-amr/code/ci/7dba8c32238418ce0b316a852b2224df586ca896/tree/LICENSE?format=raw",
+            "sha256": "8b3f1762349248d444ab9acbafe73941254e36e1064954da56bb9ddbd5873ddb"
+          }
+        ]
+      },
+      {
+        "id": "openh264",
+        "kind": "lib",
+        "repo": "https://github.com/cisco/openh264.git",
+        "commit": "98bc7cbbeb7381c94ef8f9a5d158327abbf6b8b9",
+        "enables": [
+          "libopenh264"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/cisco/openh264/98bc7cbbeb7381c94ef8f9a5d158327abbf6b8b9/LICENSE",
+            "sha256": "dd5c1c9668512530fa5a96e4c29ac4033d70a7eeb0eed7a42fddb6dd794ebdbb"
+          }
+        ]
+      },
+      {
+        "id": "openjpeg",
+        "kind": "lib",
+        "repo": "https://github.com/uclouvain/openjpeg.git",
+        "commit": "402ef5862195b177ea0a7788f2a6ef2804e62285",
+        "enables": [
+          "libopenjpeg"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/uclouvain/openjpeg/402ef5862195b177ea0a7788f2a6ef2804e62285/LICENSE",
+            "sha256": "a6af136f3e15038a666b61f376612a07d9a4e48cb7c01adbf3e33b3f14ab49b6"
+          }
+        ]
+      },
+      {
+        "id": "openmpt",
+        "kind": "lib",
+        "repo": "https://github.com/OpenMPT/openmpt.git",
+        "commit": "1b000d4bca071364157b5d35940efe4feecd2e0a",
+        "enables": [
+          "libopenmpt"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/OpenMPT/openmpt/1b000d4bca071364157b5d35940efe4feecd2e0a/LICENSE",
+            "sha256": "2c999e99533c10a347916a72e075bacf10fcedeff793bd90d41d812b46161da2"
+          }
+        ]
+      },
+      {
+        "id": "rav1e",
+        "kind": "lib",
+        "repo": "https://github.com/xiph/rav1e.git",
+        "commit": "564ae3b0007ae2b06893fd7166bf88c5a84c5b63",
+        "enables": [
+          "librav1e"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/xiph/rav1e/564ae3b0007ae2b06893fd7166bf88c5a84c5b63/LICENSE",
+            "sha256": "2dd0a109751e939dec3f80ddcfbc1ba91553f18c574399e85c159632182a2c0a"
+          },
+          {
+            "name": "PATENTS",
+            "url": "https://raw.githubusercontent.com/xiph/rav1e/564ae3b0007ae2b06893fd7166bf88c5a84c5b63/PATENTS",
+            "sha256": "7b14a70c194b19dbd0625e7eac839a63200f67484521ce5e8d8244b127e8907a"
+          }
+        ],
+        "pending": "o rav1e é Rust e compila crates de terceiros (ver Cargo.lock do commit); os textos desses crates ainda não estão incluídos"
+      },
+      {
+        "id": "snappy",
+        "kind": "lib",
+        "repo": "https://github.com/google/snappy.git",
+        "commit": "747488a9f3d0daf9b639b6704d7188fba48af179",
+        "enables": [
+          "libsnappy"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/google/snappy/747488a9f3d0daf9b639b6704d7188fba48af179/COPYING",
+            "sha256": "55172044f7e241207117448a4d9d6ba1d0925c8ad66b5d4c08c70adfa9cc3de6"
+          },
+          {
+            "name": "COPYING.notestdata",
+            "url": "https://raw.githubusercontent.com/google/snappy/747488a9f3d0daf9b639b6704d7188fba48af179/COPYING.notestdata",
+            "sha256": "5221a36a801b981fbdfda7b87db64cff231a3b88223a066c325411b539df796f"
+          }
+        ]
+      },
+      {
+        "id": "soxr",
+        "kind": "lib",
+        "repo": "https://git.code.sf.net/p/soxr/code",
+        "commit": "945b592b70470e29f917f4de89b4281fbbd540c0",
+        "enables": [
+          "libsoxr"
+        ],
+        "files": [
+          {
+            "name": "LICENCE",
+            "url": "https://sourceforge.net/p/soxr/code/ci/945b592b70470e29f917f4de89b4281fbbd540c0/tree/LICENCE?format=raw",
+            "sha256": "dc98676341fdcd29d9f279c9679d6a75288785b174ded8d1b2e316c366166135"
+          },
+          {
+            "name": "COPYING.LGPL",
+            "url": "https://sourceforge.net/p/soxr/code/ci/945b592b70470e29f917f4de89b4281fbbd540c0/tree/COPYING.LGPL?format=raw",
+            "sha256": "f2f118b9029ec1871b953639ecc46651b2fc7b62e295e6cf3ef2ac4c9a058b33"
+          }
+        ]
+      },
+      {
+        "id": "srt",
+        "kind": "lib",
+        "repo": "https://github.com/Haivision/srt.git",
+        "commit": "fcae57145c000a9e7b72aa777adb8f85c2463242",
+        "enables": [
+          "libsrt"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/Haivision/srt/fcae57145c000a9e7b72aa777adb8f85c2463242/LICENSE",
+            "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+          }
+        ]
+      },
+      {
+        "id": "svtav1",
+        "kind": "lib",
+        "repo": "https://gitlab.com/AOMediaCodec/SVT-AV1.git",
+        "commit": "fb0ed7e5999caef1c4b51b7b4c8dc2c8c10f9291",
+        "enables": [
+          "libsvtav1"
+        ],
+        "files": [
+          {
+            "name": "LICENSE-BSD2.md",
+            "url": "https://gitlab.com/api/v4/projects/AOMediaCodec%2FSVT-AV1/repository/files/LICENSE-BSD2.md/raw?ref=fb0ed7e5999caef1c4b51b7b4c8dc2c8c10f9291",
+            "sha256": "c582fcbeb9cf972a60d298bfaf41dc5adff2dd14208946edcb9bb56a281e8438"
+          },
+          {
+            "name": "LICENSE.md",
+            "url": "https://gitlab.com/api/v4/projects/AOMediaCodec%2FSVT-AV1/repository/files/LICENSE.md/raw?ref=fb0ed7e5999caef1c4b51b7b4c8dc2c8c10f9291",
+            "sha256": "0acc2fcb27472bdc9aaf8b71f37055bbdac4f54671b7d922f241bd7fcd0dd3e6"
+          },
+          {
+            "name": "PATENTS.md",
+            "url": "https://gitlab.com/api/v4/projects/AOMediaCodec%2FSVT-AV1/repository/files/PATENTS.md/raw?ref=fb0ed7e5999caef1c4b51b7b4c8dc2c8c10f9291",
+            "sha256": "20678ab10402659106dc4c147c97b2a6e94b5c0695415e15a8f195ebc3547922"
+          }
+        ]
+      },
+      {
+        "id": "twolame",
+        "kind": "lib",
+        "repo": "https://github.com/njh/twolame.git",
+        "commit": "6fced852d4d5cfad58cf9dbe3ea619b08e87d398",
+        "enables": [
+          "libtwolame"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/njh/twolame/6fced852d4d5cfad58cf9dbe3ea619b08e87d398/COPYING",
+            "sha256": "257a842724705950b07da76ce0e22ffa80ec77b3e9dfc6702522ac342409da0f"
+          }
+        ]
+      },
+      {
+        "id": "uavs3d",
+        "kind": "lib",
+        "repo": "https://github.com/uavs3/uavs3d.git",
+        "commit": "0e20d2c291853f196c68922a264bcd8471d75b68",
+        "enables": [
+          "libuavs3d"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/uavs3/uavs3d/0e20d2c291853f196c68922a264bcd8471d75b68/COPYING",
+            "sha256": "5a8dcb7da222df8a81b6e334000f859248196335e2d28e1db9f3c552827d7cdf"
+          }
+        ]
+      },
+      {
+        "id": "vvenc",
+        "kind": "lib",
+        "repo": "https://github.com/fraunhoferhhi/vvenc.git",
+        "commit": "0f2e874451d6b194615e5dfefdc96796a7da00f4",
+        "enables": [
+          "libvvenc"
+        ],
+        "files": [
+          {
+            "name": "LICENSE.txt",
+            "url": "https://raw.githubusercontent.com/fraunhoferhhi/vvenc/0f2e874451d6b194615e5dfefdc96796a7da00f4/LICENSE.txt",
+            "sha256": "88330a2cc59b9dd90674f8759900bc9c06e9efc8799dadda067609addefb49d1"
+          }
+        ]
+      },
+      {
+        "id": "zimg",
+        "kind": "lib",
+        "repo": "https://github.com/sekrit-twc/zimg.git",
+        "commit": "f6cc75ad23db1bb9c53673c15523e6b6e960ffc6",
+        "enables": [
+          "libzimg"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/sekrit-twc/zimg/f6cc75ad23db1bb9c53673c15523e6b6e960ffc6/COPYING",
+            "sha256": "7637386b5f81e8a719ca336233149005e5fa28b5e6054ea7b67de49355b0ad40"
+          }
+        ]
+      },
+      {
+        "id": "zvbi",
+        "kind": "lib",
+        "repo": "https://github.com/zapping-vbi/zvbi",
+        "commit": "d3a5ee9f2b047bf16cd1ee5ccf6ec05ee75409d0",
+        "enables": [
+          "libzvbi"
+        ],
+        "files": [
+          {
+            "name": "COPYING.md",
+            "url": "https://raw.githubusercontent.com/zapping-vbi/zvbi/d3a5ee9f2b047bf16cd1ee5ccf6ec05ee75409d0/COPYING.md",
+            "sha256": "6d679539253897582d38fcd1eabfa670c01c0ece73d8cd3dc97869fcf723f106"
+          }
+        ]
+      },
+      {
+        "id": "mingw-std-threads",
+        "kind": "dependência",
+        "repo": "https://github.com/meganz/mingw-std-threads.git",
+        "commit": "c931bac289dd431f1dd30fc4a5d1a7be36668073",
+        "usedBy": "bibliotecas C++ (threads no MinGW)",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/meganz/mingw-std-threads/c931bac289dd431f1dd30fc4a5d1a7be36668073/LICENSE",
+            "sha256": "86c148320eb0acc26607ed347e0fde9f49a236d0ec5291d36dc6a7e0e1d26b9f"
+          }
+        ]
+      },
+      {
+        "id": "libiconv",
+        "kind": "dependência",
+        "repo": "https://git.savannah.gnu.org/git/libiconv.git",
+        "commit": "5e517e5bf0e1b4575ad431e81d7a4750fa2b284e",
+        "enables": [
+          "iconv"
+        ],
+        "files": [
+          {
+            "name": "COPYING.LIB",
+            "url": "https://cgit.git.savannah.gnu.org/cgit/libiconv.git/plain/COPYING.LIB?id=5e517e5bf0e1b4575ad431e81d7a4750fa2b284e",
+            "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+          }
+        ]
+      },
+      {
+        "id": "zlib",
+        "kind": "dependência",
+        "repo": "https://github.com/madler/zlib.git",
+        "commit": "e3dc0a85b7032e98380dec011bc8f2c2ee0d8fca",
+        "enables": [
+          "zlib"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/madler/zlib/e3dc0a85b7032e98380dec011bc8f2c2ee0d8fca/LICENSE",
+            "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2"
+          }
+        ]
+      },
+      {
+        "id": "gmp",
+        "kind": "dependência",
+        "repo": "https://github.com/BtbN/gmplib.git",
+        "commit": "9994908f090c694f8a152d660dc6852e0c48557a",
+        "enables": [
+          "gmp"
+        ],
+        "files": [
+          {
+            "name": "COPYING.LESSERv3",
+            "url": "https://raw.githubusercontent.com/BtbN/gmplib/9994908f090c694f8a152d660dc6852e0c48557a/COPYING.LESSERv3",
+            "sha256": "a853c2ffec17057872340eee242ae4d96cbf2b520ae27d903e1b2fef1a5f9d1c"
+          }
+        ]
+      },
+      {
+        "id": "libogg",
+        "kind": "dependência",
+        "repo": "https://github.com/xiph/ogg.git",
+        "commit": "06a5e0262cdc28aa4ae6797627a783b5010440f0",
+        "usedBy": "vorbis, theora, opus",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/xiph/ogg/06a5e0262cdc28aa4ae6797627a783b5010440f0/COPYING",
+            "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814"
+          }
+        ]
+      },
+      {
+        "id": "openssl",
+        "kind": "dependência",
+        "repo": "https://github.com/openssl/openssl.git",
+        "commit": "openssl-3.6.3",
+        "usedBy": "libssh, srt",
+        "files": [
+          {
+            "name": "LICENSE.txt",
+            "url": "https://raw.githubusercontent.com/openssl/openssl/openssl-3.6.3/LICENSE.txt",
+            "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a"
+          }
+        ]
+      },
+      {
+        "id": "xz",
+        "kind": "dependência",
+        "repo": "https://github.com/tukaani-project/xz.git",
+        "commit": "c8b8ab2ef1eb0a0217ad2027d7f5d242ceb944d3",
+        "enables": [
+          "lzma"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/tukaani-project/xz/c8b8ab2ef1eb0a0217ad2027d7f5d242ceb944d3/COPYING",
+            "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8"
+          },
+          {
+            "name": "COPYING.0BSD",
+            "url": "https://raw.githubusercontent.com/tukaani-project/xz/c8b8ab2ef1eb0a0217ad2027d7f5d242ceb944d3/COPYING.0BSD",
+            "sha256": "0b01625d853911cd0e2e088dcfb743261034a091bb379246cb25a14cc4c74bf1"
+          },
+          {
+            "name": "COPYING.GPLv2",
+            "url": "https://raw.githubusercontent.com/tukaani-project/xz/c8b8ab2ef1eb0a0217ad2027d7f5d242ceb944d3/COPYING.GPLv2",
+            "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+          },
+          {
+            "name": "COPYING.GPLv3",
+            "url": "https://raw.githubusercontent.com/tukaani-project/xz/c8b8ab2ef1eb0a0217ad2027d7f5d242ceb944d3/COPYING.GPLv3",
+            "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+          },
+          {
+            "name": "COPYING.LGPLv2.1",
+            "url": "https://raw.githubusercontent.com/tukaani-project/xz/c8b8ab2ef1eb0a0217ad2027d7f5d242ceb944d3/COPYING.LGPLv2.1",
+            "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+          }
+        ]
+      },
+      {
+        "id": "fontconfig",
+        "kind": "dependência",
+        "repo": "https://gitlab.freedesktop.org/fontconfig/fontconfig.git",
+        "commit": "d32a1911248576d01583557efcfe4b48fb2d0a5e",
+        "enables": [
+          "fontconfig"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://gitlab.freedesktop.org/api/v4/projects/fontconfig%2Ffontconfig/repository/files/COPYING/raw?ref=d32a1911248576d01583557efcfe4b48fb2d0a5e",
+            "sha256": "51a51aa9823704fd90bccc616cdd17ebabb5b2b3e9cbde886ca02c7002288067"
+          }
+        ]
+      },
+      {
+        "id": "libsamplerate",
+        "kind": "dependência",
+        "repo": "https://github.com/libsndfile/libsamplerate.git",
+        "commit": "2ccde9568cca73c7b32c97fefca2e418c16ae5e3",
+        "usedBy": "(dependência no BtbN)",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/libsndfile/libsamplerate/2ccde9568cca73c7b32c97fefca2e418c16ae5e3/COPYING",
+            "sha256": "2c1f76ce2effdddb425018405d5690c0b1ab4e6976e35296b0a6db65c5e1a55d"
+          }
+        ]
+      },
+      {
+        "id": "libudfread",
+        "kind": "dependência",
+        "repo": "https://code.videolan.org/videolan/libudfread.git",
+        "commit": "0151d9d61e5f832664f502608d41a77c28846efa",
+        "usedBy": "bluray",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://code.videolan.org/api/v4/projects/videolan%2Flibudfread/repository/files/COPYING/raw?ref=0151d9d61e5f832664f502608d41a77c28846efa",
+            "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551"
+          }
+        ]
+      },
+      {
+        "id": "libunibreak",
+        "kind": "dependência",
+        "repo": "https://github.com/adah1972/libunibreak.git",
+        "commit": "3ce4bfa3129ff3738046a44a6db533d2ce25af2b",
+        "usedBy": "ass",
+        "files": [
+          {
+            "name": "LICENCE",
+            "url": "https://raw.githubusercontent.com/adah1972/libunibreak/3ce4bfa3129ff3738046a44a6db533d2ce25af2b/LICENCE",
+            "sha256": "0c57e2ec42ece17791a75d2f9b2f8e0663181be008667a507f765b3ef22522db"
+          }
+        ]
+      },
+      {
+        "id": "opencl-headers",
+        "kind": "dependência",
+        "repo": "https://github.com/KhronosGroup/OpenCL-Headers.git",
+        "commit": "c9c8ccfab584f9f7610057c4633dbd3df7e012cc",
+        "enables": [
+          "opencl"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/OpenCL-Headers/c9c8ccfab584f9f7610057c4633dbd3df7e012cc/LICENSE",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+          }
+        ]
+      },
+      {
+        "id": "vulkan-headers",
+        "kind": "dependência",
+        "repo": "https://github.com/KhronosGroup/Vulkan-Headers.git",
+        "commit": "v1.4.359",
+        "enables": [
+          "vulkan"
+        ],
+        "files": [
+          {
+            "name": "LICENSE.md",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Headers/v1.4.359/LICENSE.md",
+            "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903"
+          }
+        ]
+      },
+      {
+        "id": "vulkan-shim-loader",
+        "kind": "dependência",
+        "repo": "https://github.com/BtbN/Vulkan-Shim-Loader.git",
+        "commit": "65b3936528cd92eb4ea3de485d03f858a3850484",
+        "enables": [
+          "vulkan"
+        ],
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/BtbN/Vulkan-Shim-Loader/65b3936528cd92eb4ea3de485d03f858a3850484/LICENSE",
+            "sha256": "8d4d279343d72e5b9e06bbe38c1ad8660fa8eabc217164a5b482ddf4ab0dba9d"
+          }
+        ]
+      },
+      {
+        "id": "spirv-cross",
+        "kind": "dependência",
+        "repo": "https://github.com/KhronosGroup/SPIRV-Cross.git",
+        "commit": "9c3c8e2cefdd8194b193bb8ed2fdff4d5527e382",
+        "usedBy": "placebo",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/SPIRV-Cross/9c3c8e2cefdd8194b193bb8ed2fdff4d5527e382/LICENSE",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+          }
+        ]
+      },
+      {
+        "id": "spirv-headers",
+        "kind": "dependência",
+        "repo": "https://github.com/KhronosGroup/SPIRV-Headers.git",
+        "commit": "f0bf307f7c49d26484db596185cece53c37701fc",
+        "usedBy": "shaderc, placebo",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/SPIRV-Headers/f0bf307f7c49d26484db596185cece53c37701fc/LICENSE",
+            "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613"
+          }
+        ]
+      },
+      {
+        "id": "amf",
+        "kind": "dependência",
+        "repo": "https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git",
+        "commit": "c35f613aea2e5057a688c979e75b1cf24253297e",
+        "enables": [
+          "amf"
+        ],
+        "files": [
+          {
+            "name": "LICENSE.txt",
+            "url": "https://raw.githubusercontent.com/GPUOpen-LibrariesAndSDKs/AMF/c35f613aea2e5057a688c979e75b1cf24253297e/LICENSE.txt",
+            "sha256": "eb297397aaa455b5668ab67d216b83828466152dab123fa92384c6ec16b74170"
+          }
+        ]
+      },
+      {
+        "id": "libpng",
+        "kind": "dependência",
+        "repo": "https://github.com/glennrp/libpng.git",
+        "commit": "d1d0abeffede1cc898ddc3d0e600839cf026d749",
+        "usedBy": "aribb24, freetype",
+        "files": [
+          {
+            "name": "LICENSE.md",
+            "url": "https://raw.githubusercontent.com/glennrp/libpng/d1d0abeffede1cc898ddc3d0e600839cf026d749/LICENSE.md",
+            "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+          }
+        ]
+      },
+      {
+        "id": "chromaprint",
+        "kind": "dependência",
+        "repo": "https://github.com/acoustid/chromaprint.git",
+        "commit": "aed8eba2202dd9d7b3b0a56c77904cc805490d72",
+        "enables": [
+          "chromaprint"
+        ],
+        "files": [
+          {
+            "name": "LICENSE.md",
+            "url": "https://raw.githubusercontent.com/acoustid/chromaprint/aed8eba2202dd9d7b3b0a56c77904cc805490d72/LICENSE.md",
+            "sha256": "562cfe59627e0c4e8e3b066f3ff2e9736f83811ffe4c6c2c7796595aa7595ebd"
+          }
+        ]
+      },
+      {
+        "id": "ffnvcodec",
+        "kind": "dependência",
+        "repo": "https://github.com/FFmpeg/nv-codec-headers.git",
+        "commit": "eddcea9e27f6b772057c9b3f87de2cc1737faffc",
+        "enables": [
+          "ffnvcodec"
+        ],
+        "files": [],
+        "note": "só cabeçalhos (carregam o driver NVIDIA em tempo de execução); o repositório não tem arquivo de licença e o texto MIT está nos comentários dos cabeçalhos"
+      },
+      {
+        "id": "brotli",
+        "kind": "dependência",
+        "repo": "https://github.com/google/brotli.git",
+        "commit": "8e10eeb3378f6c459dbaf033ca6727e9816afccb",
+        "usedBy": "jxl, freetype",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/google/brotli/8e10eeb3378f6c459dbaf033ca6727e9816afccb/LICENSE",
+            "sha256": "3d180008e36922a4e8daec11c34c7af264fed5962d07924aea928c38e8663c94"
+          }
+        ]
+      },
+      {
+        "id": "lcms2",
+        "kind": "dependência",
+        "repo": "https://github.com/mm2/Little-CMS.git",
+        "commit": "a5b898c7e3985550aab846a2abb4ae08904a857f",
+        "usedBy": "jxl",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/mm2/Little-CMS/a5b898c7e3985550aab846a2abb4ae08904a857f/LICENSE",
+            "sha256": "6dbd60437f8ef91d8de1f08ad75882547fd4931bfcc3566a0735f28db1484d31"
+          }
+        ]
+      },
+      {
+        "id": "mbedtls",
+        "kind": "dependência",
+        "repo": "https://github.com/ARMmbed/mbedtls.git",
+        "commit": "v4.2.0",
+        "usedBy": "rist",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/ARMmbed/mbedtls/v4.2.0/LICENSE",
+            "sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b"
+          }
+        ]
+      },
+      {
+        "id": "lv2",
+        "kind": "dependência",
+        "repo": "https://github.com/lv2/lv2.git",
+        "commit": "3c57dae600a5ad8d05acd53ee3490f7d91cb7be6",
+        "usedBy": "lilv",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/lv2/lv2/3c57dae600a5ad8d05acd53ee3490f7d91cb7be6/COPYING",
+            "sha256": "1e6bb175e193608b767ff25a4ed68b82c4db599491cf0d2694435cf60e9a4841"
+          }
+        ]
+      },
+      {
+        "id": "serd",
+        "kind": "dependência",
+        "repo": "https://github.com/drobilla/serd.git",
+        "commit": "b6053bb2a4533e6a8e3821c1061f140d5e666938",
+        "usedBy": "lilv",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/drobilla/serd/b6053bb2a4533e6a8e3821c1061f140d5e666938/COPYING",
+            "sha256": "ae223adebe7cc1ee0716e0f926d1ecc8e42c6e4da7e1d7418c9c07fae244bbde"
+          }
+        ]
+      },
+      {
+        "id": "zix",
+        "kind": "dependência",
+        "repo": "https://github.com/drobilla/zix.git",
+        "commit": "17d632393f5addb6fa24dda2927b96515407cca7",
+        "usedBy": "lilv",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/drobilla/zix/17d632393f5addb6fa24dda2927b96515407cca7/COPYING",
+            "sha256": "1314cc14fb947491491c517c533ac7de4f6798585f922a472358082c25ac1881"
+          }
+        ]
+      },
+      {
+        "id": "sord",
+        "kind": "dependência",
+        "repo": "https://github.com/drobilla/sord.git",
+        "commit": "4b5232bb91e7f2f1b84df384494d073fabbcd312",
+        "usedBy": "lilv",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/drobilla/sord/4b5232bb91e7f2f1b84df384494d073fabbcd312/COPYING",
+            "sha256": "ae223adebe7cc1ee0716e0f926d1ecc8e42c6e4da7e1d7418c9c07fae244bbde"
+          }
+        ]
+      },
+      {
+        "id": "sratom",
+        "kind": "dependência",
+        "repo": "https://github.com/lv2/sratom.git",
+        "commit": "9e8ee84eed502e6030ce8bb49694fd28542b08fc",
+        "usedBy": "lilv",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/lv2/sratom/9e8ee84eed502e6030ce8bb49694fd28542b08fc/COPYING",
+            "sha256": "1d968c655ecad113e128dbf4d4deabd9e30b931b42943b6a681c9cf11d7da5d4"
+          }
+        ]
+      },
+      {
+        "id": "lilv",
+        "kind": "dependência",
+        "repo": "https://github.com/lv2/lilv.git",
+        "commit": "4b8f30055fa5cb4134a2eb45fc1555bc04289314",
+        "enables": [
+          "lv2"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/lv2/lilv/4b8f30055fa5cb4134a2eb45fc1555bc04289314/COPYING",
+            "sha256": "ae223adebe7cc1ee0716e0f926d1ecc8e42c6e4da7e1d7418c9c07fae244bbde"
+          }
+        ]
+      },
+      {
+        "id": "openal-soft",
+        "kind": "dependência",
+        "repo": "https://github.com/kcat/openal-soft.git",
+        "commit": "c157b87cb9eb58d747748e49f82ee4a64d1dcf8b",
+        "enables": [
+          "openal"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/kcat/openal-soft/c157b87cb9eb58d747748e49f82ee4a64d1dcf8b/COPYING",
+            "sha256": "d808ce217e5b611854da622b57ec29fe545584c48bc5352fae72a4b6e5074a15"
+          },
+          {
+            "name": "LICENSE.Apache-2.0.txt",
+            "url": "https://raw.githubusercontent.com/kcat/openal-soft/c157b87cb9eb58d747748e49f82ee4a64d1dcf8b/LICENSE.Apache-2.0.txt",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+          },
+          {
+            "name": "LICENSE.BSD-3-Clause.txt",
+            "url": "https://raw.githubusercontent.com/kcat/openal-soft/c157b87cb9eb58d747748e49f82ee4a64d1dcf8b/LICENSE.BSD-3-Clause.txt",
+            "sha256": "b5a08cf98996dd83aa906a72c163600f6cb17a65ce546a553815a1267abd43ff"
+          },
+          {
+            "name": "LICENSE-pffft",
+            "url": "https://raw.githubusercontent.com/kcat/openal-soft/c157b87cb9eb58d747748e49f82ee4a64d1dcf8b/LICENSE-pffft",
+            "sha256": "64056328b3e7bc104e24ef96accc1a7abead156f0c02d1b87c97e3f3a28030de"
+          }
+        ]
+      },
+      {
+        "id": "sdl",
+        "kind": "dependência",
+        "repo": "https://github.com/libsdl-org/SDL.git",
+        "commit": "a2e7c76bda17c853ba93c7d2c9fdddf8a9d621d1",
+        "enables": [
+          "sdl2"
+        ],
+        "files": [
+          {
+            "name": "LICENSE.txt",
+            "url": "https://raw.githubusercontent.com/libsdl-org/SDL/a2e7c76bda17c853ba93c7d2c9fdddf8a9d621d1/LICENSE.txt",
+            "sha256": "1c040b8271b37e5076359f8fd54240e371114112924d2df81ef87c7d6a1dfdfd"
+          }
+        ]
+      },
+      {
+        "id": "libva",
+        "kind": "dependência",
+        "repo": "https://github.com/intel/libva.git",
+        "commit": "6b07f7100512817f736967e899b8c26313c20623",
+        "enables": [
+          "vaapi"
+        ],
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/intel/libva/6b07f7100512817f736967e899b8c26313c20623/COPYING",
+            "sha256": "c86a782ee845b52472dae9b9d79fb915d333628ac0efe49cdce63644814931de"
+          }
+        ]
+      },
+      {
+        "id": "fftw3",
+        "kind": "dependência",
+        "repo": "https://github.com/FFTW/fftw3.git",
+        "commit": "93ed4c786934aec9946f8dda4b4e3eb08f8be41c",
+        "usedBy": "chromaprint (-DFFT_LIB=fftw3)",
+        "files": [
+          {
+            "name": "COPYING",
+            "url": "https://raw.githubusercontent.com/FFTW/fftw3/93ed4c786934aec9946f8dda4b4e3eb08f8be41c/COPYING",
+            "sha256": "231f7edcc7352d7734a96eef0b8030f77982678c516876fcb81e25b32d68564c"
+          },
+          {
+            "name": "COPYRIGHT",
+            "url": "https://raw.githubusercontent.com/FFTW/fftw3/93ed4c786934aec9946f8dda4b4e3eb08f8be41c/COPYRIGHT",
+            "sha256": "8a74b35d541d93fdf58a22a3d3baa48ae3edbf6d715edfeb6457c21968ae43ac"
+          }
+        ],
+        "note": "o FFTW3 é GPLv2+ e o BtbN o liga estaticamente ao chromaprint (-DFFT_LIB=fftw3), dentro de avformat-62.dll; por isso esse arquivo combina código GPL com o FFmpeg LGPLv3",
+        "pending": "avformat-62.dll contém o FFTW3 (GPLv2+) por causa do chromaprint, então o FFmpeg embutido não é só LGPLv3. É preciso decidir: distribuir os binários do FFmpeg sob a GPLv3 ou usar um build sem chromaprint"
+      },
+      {
+        "id": "glslang",
+        "kind": "embutida",
+        "repo": "https://github.com/KhronosGroup/glslang.git",
+        "commit": "2ee090f606ace31e07f584b1c1b9ddf4909ce202",
+        "usedBy": "shaderc (embutido via utils/git-sync-deps)",
+        "files": [
+          {
+            "name": "LICENSE.txt",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/glslang/2ee090f606ace31e07f584b1c1b9ddf4909ce202/LICENSE.txt",
+            "sha256": "17e70c676e1521ff3e4686f04a2053d93a7e28a33be8de7ec37ab0ff72feb677"
+          }
+        ]
+      },
+      {
+        "id": "spirv-tools",
+        "kind": "embutida",
+        "repo": "https://github.com/KhronosGroup/SPIRV-Tools.git",
+        "commit": "f589ef005c49f6f19c8e78eb5269104ba293beb4",
+        "usedBy": "shaderc (embutido via utils/git-sync-deps)",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/SPIRV-Tools/f589ef005c49f6f19c8e78eb5269104ba293beb4/LICENSE",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+          }
+        ]
+      },
+      {
+        "id": "spirv-headers-shaderc",
+        "kind": "embutida",
+        "repo": "https://github.com/KhronosGroup/SPIRV-Headers.git",
+        "commit": "942fe4b988359a0750b79f0ae7ed735994d3147d",
+        "usedBy": "shaderc (embutido via utils/git-sync-deps)",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/SPIRV-Headers/942fe4b988359a0750b79f0ae7ed735994d3147d/LICENSE",
+            "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613"
+          }
+        ]
+      },
+      {
+        "id": "highway",
+        "kind": "embutida",
+        "repo": "https://github.com/google/highway.git",
+        "commit": "457c891775a7397bdb0376bb1031e6e027af1c48",
+        "usedBy": "jxl (submódulo third_party/highway)",
+        "files": [
+          {
+            "name": "LICENSE",
+            "url": "https://raw.githubusercontent.com/google/highway/457c891775a7397bdb0376bb1031e6e027af1c48/LICENSE",
+            "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1"
+          },
+          {
+            "name": "LICENSE-BSD3",
+            "url": "https://raw.githubusercontent.com/google/highway/457c891775a7397bdb0376bb1031e6e027af1c48/LICENSE-BSD3",
+            "sha256": "d25e82e26acd42ca3ccc9993622631163425b869b9e16284226d534cff6470f2"
+          }
+        ]
+      }
+    ]
+  },
+  "rust": [
+    {
+      "crates": [
+        "alloc-stdlib 0.3.0"
+      ],
+      "repo": "https://github.com/dropbox/rust-alloc-no-stdlib",
+      "commit": "0a81fd6928ea3b33c8cd484aa4575d50ffb98012",
+      "files": [
+        {
+          "name": "LICENSE",
+          "url": "https://raw.githubusercontent.com/dropbox/rust-alloc-no-stdlib/0a81fd6928ea3b33c8cd484aa4575d50ffb98012/LICENSE",
+          "sha256": "c0c56f26d9c051cac4d200c34c84e7ae9aaa853e01a982a1df08b09931e518ae"
+        }
+      ]
+    },
+    {
+      "crates": [
+        "selectors 0.38.0"
+      ],
+      "repo": "https://github.com/servo/stylo",
+      "commit": "572ecba2d1600e7c3d490586692a209faf703baa",
+      "note": "o repositório não tem arquivo de licença; texto da MPL-2.0 copiado do crate cssparser 0.37.0 (também do projeto Servo)",
+      "files": [
+        {
+          "name": "LICENSE",
+          "cargo": "cssparser-0.37.0/LICENSE",
+          "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+        }
+      ]
+    },
+    {
+      "crates": [
+        "webview2-com 0.39.1",
+        "webview2-com-sys 0.39.1"
+      ],
+      "repo": "https://github.com/wravery/webview2-rs",
+      "commit": "edc2caf886175ccaebe86078c9cfe1ae2a187328",
+      "files": [
+        {
+          "name": "LICENSE",
+          "url": "https://raw.githubusercontent.com/wravery/webview2-rs/edc2caf886175ccaebe86078c9cfe1ae2a187328/LICENSE",
+          "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+        }
+      ]
+    },
+    {
+      "crates": [
+        "webview2-com-macros 0.8.1"
+      ],
+      "repo": "https://github.com/wravery/webview2-rs",
+      "commit": "dffa41a8a46d3f5565eefbff2de57d38d399f158",
+      "files": [
+        {
+          "name": "LICENSE",
+          "url": "https://raw.githubusercontent.com/wravery/webview2-rs/dffa41a8a46d3f5565eefbff2de57d38d399f158/LICENSE",
+          "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+        }
+      ]
+    }
+  ]
+}

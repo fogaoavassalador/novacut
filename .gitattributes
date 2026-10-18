@@ -2,3 +2,4 @@
 *.png binary
 *.ico binary
 *.icns binary
+third_party_licenses/** -text

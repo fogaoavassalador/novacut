@@ -13,6 +13,7 @@
     "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
     "samples": "node scripts/make-samples.mjs",
     "prepare-ffmpeg": "node scripts/prepare-ffmpeg.mjs",
+    "fetch-licenses": "node scripts/fetch-licenses.mjs",
     "notices": "node scripts/gen-notices.mjs",
     "package": "tauri build --bundles nsis --config src-tauri/tauri.package.conf.json",
     "tauri": "tauri"

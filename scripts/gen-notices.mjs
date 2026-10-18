@@ -2,8 +2,10 @@
 //   THIRD_PARTY_NOTICES.txt — dependências JavaScript (produção) e crates Rust
 //                             (dependências normais, Windows), com os textos de licença
 //   FFMPEG-NOTICE.txt       — versão, configuração e onde obter o código-fonte do FFmpeg
+//   FFMPEG-THIRD-PARTY.txt  — licenças das bibliotecas externas compiladas no FFmpeg
 //   GPL-3.0.txt             — exigido pela LGPLv3 (que incorpora a GPLv3)
 // Requer `npm run prepare-ffmpeg` antes (lê src-tauri/ffmpeg/ffmpeg-manifest.json).
+// Textos que não vêm nos pacotes ficam em third_party_licenses/ (npm run fetch-licenses).
 // Uso: npm run notices
 
 import { execFileSync } from "node:child_process";
@@ -23,6 +25,28 @@ function licenseTexts(dir) {
     .filter((f) => LICENSE_FILE.test(f))
     .sort()
     .map((f) => `--- ${f} ---\n${readFileSync(join(dir, f), "utf8").trim()}`);
+}
+
+// ---------- textos versionados em third_party_licenses/ (npm run fetch-licenses) ----------
+const tplDir = resolve("third_party_licenses");
+const tplSources = JSON.parse(readFileSync(join(tplDir, "sources.json"), "utf8"));
+const tplHashes = new Map();
+for (const lib of tplSources.ffmpeg.libraries) for (const f of lib.files) tplHashes.set(join("ffmpeg", lib.id, f.name), f.sha256);
+for (const e of tplSources.rust) for (const c of e.crates) for (const f of e.files) tplHashes.set(join("rust", c.replace(" ", "-"), f.name), f.sha256);
+/** Textos de third_party_licenses/<rel>/, conferidos com o SHA-256 de sources.json. */
+function thirdPartyTexts(rel, label) {
+  const dir = join(tplDir, rel);
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .sort()
+    .map((f) => {
+      const buf = readFileSync(join(dir, f));
+      const expected = tplHashes.get(join(rel, f));
+      if (createHash("sha256").update(buf).digest("hex") !== expected) {
+        warnings.push(`${label}: third_party_licenses/${rel}/${f} não confere com sources.json (rode npm run fetch-licenses)`);
+      }
+      return `--- ${f} ---\n${buf.toString("utf8").trim()}`;
+    });
 }
 
 const rule = "=".repeat(78);
@@ -78,7 +102,9 @@ const rust = new Set();
 })(rootId);
 for (const id of [...rust].sort((a, b) => pkgs.get(a).name.localeCompare(pkgs.get(b).name))) {
   const p = pkgs.get(id);
-  const texts = licenseTexts(dirname(p.manifest_path));
+  let texts = licenseTexts(dirname(p.manifest_path));
+  // crates publicados sem o arquivo: texto obtido do repositório por npm run fetch-licenses
+  if (!texts.length) texts = thirdPartyTexts(join("rust", `${p.name}-${p.version}`), `Rust ${p.name} ${p.version}`);
   if (!texts.length) warnings.push(`Rust ${p.name} ${p.version}: sem arquivo de licença no crate (licença declarada: ${p.license})`);
   sections.push(`${rule}\n${p.name} ${p.version} (Rust) — ${p.license ?? p.license_file ?? "licença não declarada"}\n${p.repository ?? ""}\n\n${texts.join("\n\n")}`);
 }
@@ -96,10 +122,43 @@ const manifestPath = resolve("src-tauri", "ffmpeg", "ffmpeg-manifest.json");
 if (!existsSync(manifestPath)) throw new Error("rode `npm run prepare-ffmpeg` antes");
 const ff = JSON.parse(readFileSync(manifestPath, "utf8"));
 const commit = /-g([0-9a-f]{7,40})/.exec(ff.version)?.[1];
-const libs = ff.configuration
+const enabled = ff.configuration
   .split(/\s+/)
-  .filter((f) => f.startsWith("--enable-lib"))
-  .map((f) => f.slice("--enable-lib".length));
+  .filter((f) => f.startsWith("--enable-"))
+  .map((f) => f.slice("--enable-".length));
+const libs = enabled.filter((f) => f.startsWith("lib")).map((f) => f.slice("lib".length));
+// opções sem o prefixo "lib" que também ligam código de terceiros ao FFmpeg
+const EXTERNAL = new Set(["iconv", "zlib", "fontconfig", "gmp", "lzma", "opencl", "vulkan", "amf", "chromaprint", "ffnvcodec", "lv2", "openal", "sdl2", "vaapi"]);
+const ffLibs = tplSources.ffmpeg.libraries;
+if (!tplSources.ffmpeg.build.startsWith(ff.version)) {
+  warnings.push(`FFmpeg: third_party_licenses/sources.json é do build ${tplSources.ffmpeg.build}, mas o embutido é ${ff.version}; atualize as versões pelos scripts do BtbN`);
+}
+const covered = new Set(ffLibs.flatMap((l) => l.enables ?? []));
+const uncovered = enabled.filter((f) => (f.startsWith("lib") || EXTERNAL.has(f)) && !covered.has(f));
+if (uncovered.length) warnings.push(`FFmpeg: sem texto de licença em third_party_licenses/sources.json para --enable-${uncovered.join(", --enable-")}`);
+for (const l of ffLibs) if (l.pending) warnings.push(`FFmpeg/${l.id}: ${l.pending}`);
+const kindOrder = ["lib", "dependência", "embutida"];
+const ffSections = [...ffLibs]
+  .sort((a, b) => kindOrder.indexOf(a.kind) - kindOrder.indexOf(b.kind) || a.id.localeCompare(b.id))
+  .map((l) => {
+    const texts = thirdPartyTexts(join("ffmpeg", l.id), `FFmpeg/${l.id}`);
+    if (!texts.length && l.files.length) warnings.push(`FFmpeg/${l.id}: textos ausentes em third_party_licenses/ffmpeg/${l.id} (rode npm run fetch-licenses)`);
+    const what = l.kind === "lib" ? `--enable-${l.enables.join(", --enable-")}` : `${l.kind}${l.usedBy ? ` de ${l.usedBy}` : ""}`;
+    return `${rule}\n${l.id} (${what})\n${l.repo} @ ${l.commit}${l.note ? `\nNota: ${l.note}` : ""}\n\n${texts.join("\n\n")}`;
+  });
+writeFileSync(
+  join(outDir, "FFMPEG-THIRD-PARTY.txt"),
+  `${BOM}NovaCut — licenças das bibliotecas de terceiros compiladas no FFmpeg embutido
+Gerado automaticamente por scripts/gen-notices.mjs em ${new Date().toISOString()}.
+
+Build: ${tplSources.ffmpeg.build}
+Versões: scripts.d do BtbN FFmpeg-Builds, release ${tplSources.ffmpeg.btbnRelease}, commit ${tplSources.ffmpeg.btbnCommit}
+Cada texto foi obtido do repositório da biblioteca no commit indicado.
+
+${ffSections.join("\n\n")}
+`,
+);
+const ffNotes = ffLibs.filter((l) => l.note).map((l) => `  ${l.id}: ${l.note}`);
 writeFileSync(
   join(outDir, "FFMPEG-NOTICE.txt"),
   `${BOM}O NovaCut usa o FFmpeg (https://ffmpeg.org), executado como programa separado.
@@ -124,10 +183,10 @@ ${ff.files.map((f) => `  ${f.sha256}  ${f.name}`).join("\n")}
 
 Bibliotecas externas compiladas no FFmpeg (cada uma tem a própria licença):
   ${libs.join(", ")}
-`,
-);
-warnings.push(
-  `FFmpeg: os textos de licença das ${libs.length} bibliotecas externas (${libs.slice(0, 6).join(", ")}…) não vêm no pacote BtbN e precisam ser incluídos antes de distribuir publicamente`,
+
+Os textos de licença dessas bibliotecas, das dependências delas e do código que elas
+embutem estão em FFMPEG-THIRD-PARTY.txt (${ffLibs.length} componentes).
+${ffNotes.length ? `\nObservações:\n${ffNotes.join("\n")}\n` : ""}`,
 );
 
 // ---------- GPLv3 (exigida pela LGPLv3) ----------
