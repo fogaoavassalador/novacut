@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getFfmpegStatus, type FfmpegStatus } from "../platform/ffmpeg";
 
+const SOURCE_LABEL = { env: "NOVACUT_FFMPEG_DIR", bundled: "embutido", path: "PATH do sistema" } as const;
+
 type State =
   | { kind: "loading" }
   | { kind: "ready"; status: FfmpegStatus }
@@ -56,7 +58,7 @@ function FfmpegIndicator({ state }: { state: State }) {
   return (
     <span title={`${s.ffmpegPath ?? ""}${s.error ? `\n${s.error}` : ""}`}>
       <span className={`dot ${s.error ? "warn" : "ok"}`} />
-      FFmpeg {s.version} · {s.license} · encoders H.264 compilados: {encoders}
+      FFmpeg {s.version} ({SOURCE_LABEL[s.source ?? "path"]}) · {s.license} · encoders H.264 compilados: {encoders}
     </span>
   );
 }

@@ -7,7 +7,10 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export async function connect(port = process.env.CDP_PORT ?? 9333) {
   const targets = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
-  const page = targets.find((t) => t.type === "page" && t.url.startsWith("http://localhost:1420"));
+  // Dev (Vite) ou build de release (frontend embutido, servido em tauri.localhost).
+  const page = targets.find(
+    (t) => t.type === "page" && (t.url.startsWith("http://localhost:1420") || t.url.startsWith("http://tauri.localhost")),
+  );
   if (!page) throw new Error("página do NovaCut não encontrada na porta CDP");
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => {

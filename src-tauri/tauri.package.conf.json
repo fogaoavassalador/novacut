@@ -1,0 +1,12 @@
+{
+  "bundle": {
+    "resources": {
+      "ffmpeg/*": null,
+      "licenses/*": null,
+      "ffmpeg/*.exe": "ffmpeg/",
+      "ffmpeg/*.dll": "ffmpeg/",
+      "ffmpeg/*.json": "ffmpeg/",
+      "licenses/*.txt": "licenses/"
+    }
+  }
+}

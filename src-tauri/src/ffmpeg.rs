@@ -21,6 +21,8 @@ pub const H264_ENCODERS: &[&str] = &[
 #[serde(rename_all = "camelCase")]
 pub struct FfmpegStatus {
     pub found: bool,
+    /// Origem do ffmpeg encontrado (substituição, embutido ou PATH).
+    pub source: Option<Source>,
     pub ffmpeg_path: Option<String>,
     pub ffprobe_path: Option<String>,
     pub version: Option<String>,
@@ -36,6 +38,7 @@ impl FfmpegStatus {
     pub fn missing(error: impl Into<String>) -> Self {
         Self {
             found: false,
+            source: None,
             ffmpeg_path: None,
             ffprobe_path: None,
             version: None,
@@ -59,15 +62,43 @@ fn find_in_dir(dir: &Path, tool: &str) -> Option<PathBuf> {
     candidate.is_file().then_some(candidate)
 }
 
-/// Procura `tool` (ex.: "ffmpeg") em `NOVACUT_FFMPEG_DIR` e depois no PATH.
-pub fn locate(tool: &str) -> Option<PathBuf> {
+/// Pasta do FFmpeg distribuído com o app (recursos do instalador), definida na inicialização.
+static BUNDLED_DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+
+/// Registra a pasta do FFmpeg embutido (chamado uma vez, na inicialização do app).
+pub fn set_bundled_dir(dir: PathBuf) {
+    let _ = BUNDLED_DIR.set(dir);
+}
+
+/// De onde veio o executável encontrado.
+#[derive(Debug, Clone, Copy, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum Source {
+    /// `NOVACUT_FFMPEG_DIR` (substituição explícita).
+    Env,
+    /// Distribuído com o app.
+    Bundled,
+    /// PATH do sistema.
+    Path,
+}
+
+/// Procura `tool` (ex.: "ffmpeg"): `NOVACUT_FFMPEG_DIR`, depois o FFmpeg
+/// embutido no app, depois o PATH.
+pub fn locate_with_source(tool: &str) -> Option<(PathBuf, Source)> {
     if let Some(dir) = std::env::var_os("NOVACUT_FFMPEG_DIR") {
         if let Some(p) = find_in_dir(Path::new(&dir), tool) {
-            return Some(p);
+            return Some((p, Source::Env));
         }
     }
+    if let Some(p) = BUNDLED_DIR.get().and_then(|d| find_in_dir(d, tool)) {
+        return Some((p, Source::Bundled));
+    }
     let path = std::env::var_os("PATH")?;
-    std::env::split_paths(&path).find_map(|dir| find_in_dir(&dir, tool))
+    std::env::split_paths(&path).find_map(|dir| find_in_dir(&dir, tool)).map(|p| (p, Source::Path))
+}
+
+pub fn locate(tool: &str) -> Option<PathBuf> {
+    locate_with_source(tool).map(|(p, _)| p)
 }
 
 /// Cria um `Command` que não abre janela de console no Windows.
@@ -196,7 +227,7 @@ fn run_capture(program: &Path, args: &[&str]) -> Result<String, String> {
 }
 
 pub fn status() -> FfmpegStatus {
-    let Some(ffmpeg) = locate("ffmpeg") else {
+    let Some((ffmpeg, source)) = locate_with_source("ffmpeg") else {
         return FfmpegStatus::missing(
             "ffmpeg não encontrado (defina NOVACUT_FFMPEG_DIR ou adicione ao PATH)",
         );
@@ -213,6 +244,7 @@ pub fn status() -> FfmpegStatus {
 
     FfmpegStatus {
         found: true,
+        source: Some(source),
         ffmpeg_path: Some(ffmpeg.display().to_string()),
         ffprobe_path: ffprobe.as_ref().map(|p| p.display().to_string()),
         version: parse_version(&version_out),

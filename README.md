@@ -93,6 +93,48 @@ proporção), codificador e qualidade (taxa de bits proporcional à área do qua
 - Um teste de integração exporta um projeto sintético de verdade e confere pixels (camadas,
   centralização, brilho/contraste, velocidade) e níveis de áudio (silêncio, posição, +6 dB a 200%).
 
+## Empacotamento (instalador Windows)
+
+```powershell
+npm run package        # = tauri build --bundles nsis --config src-tauri/tauri.package.conf.json
+```
+
+Resultado: `src-tauri/target/release/bundle/nsis/NovaCut_<versão>_x64-setup.exe` (~45 MiB). Na
+primeira vez, a CLI do Tauri baixa as ferramentas do NSIS (`nsis-3.13.zip`, ~2,3 MB, e
+`nsis_tauri_utils.dll`, ~34 KB, de `github.com/tauri-apps`, conferidos por SHA-1) para
+`%LOCALAPPDATA%\tauri`.
+
+A configuração base inclui `ffmpeg/*` e `licenses/*` (sempre casam, por causa do `.gitkeep`, então
+um clone novo compila sem o FFmpeg preparado); o patch `tauri.package.conf.json` troca esses
+padrões por `*.exe`, `*.dll`, `*.json` e `*.txt` só no empacotamento.
+
+O `beforeBuildCommand` roda `npm run build`, `npm run prepare-ffmpeg` e `npm run notices`:
+
+- **`prepare-ffmpeg`** copia `ffmpeg.exe`, `ffprobe.exe` e as DLLs do build LGPL *shared* (origem:
+  `NOVACUT_FFMPEG_SOURCE` ou o `ffmpeg` do PATH) para `src-tauri/ffmpeg/`, grava um manifesto com
+  SHA-256 e **recusa builds GPL/nonfree**. As DLLs separadas permitem trocar as bibliotecas (LGPL).
+- **`notices`** gera em `src-tauri/licenses/`: `THIRD_PARTY_NOTICES.txt` (dependências JS de
+  produção e crates Rust do executável, com textos de licença), `FFMPEG-NOTICE.txt` (versão,
+  configuração, SHA-256 e onde obter o código-fonte), `FFmpeg-LICENSE.txt` (LGPLv3) e
+  `GPL-3.0.txt` (exigida pela LGPLv3; cópia oficial conferida por SHA-256).
+- O app procura o FFmpeg nesta ordem: `NOVACUT_FFMPEG_DIR` → pasta `ffmpeg` instalada com o app →
+  PATH. A barra de status mostra a origem.
+- Instalador NSIS por usuário (sem administrador), em português do Brasil; ícone próprio gerado de
+  `src-tauri/app-icon.svg` (`npx tauri icon src-tauri/app-icon.svg`).
+
+### Pendências antes de distribuir publicamente
+
+`npm run notices` lista como `PENDENTE`:
+
+- os textos de licença das bibliotecas externas compiladas no FFmpeg (dav1d, openh264, harfbuzz…;
+  43 no build atual), que o pacote BtbN não inclui;
+- 5 crates Rust que declaram licença (MIT/BSD/MPL) mas não trazem o arquivo de texto;
+- a licença do próprio NovaCut (ainda não definida);
+- revisão jurídica sobre patentes de H.264/AAC e sobre a licença de patentes do OpenH264;
+- assinatura de código: o instalador não é assinado, então o Windows SmartScreen avisa ao executá-lo;
+- o identificador `com.novacut.app` termina em `.app` (o Tauri avisa: conflita só no macOS). Trocá-lo
+  muda a pasta de dados do app (cache de proxies), então convém decidir antes da primeira versão.
+
 ## Painel de propriedades
 
 Volume (0–400%), velocidade (0,1×–16×; deslizante 0,25×–4×), brilho e contraste (0–200%) do clipe
@@ -178,4 +220,5 @@ e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `
 - [x] Etapa 7 — painel de propriedades: volume (com ganho real acima de 100% na pré-visualização),
       velocidade, brilho e contraste
 - [x] Etapa 8 — exportação MP4: gerador de argumentos, encoders testados, progresso, cancelamento
-- [ ] Etapa 9 — empacotamento com FFmpeg e licenças
+- [x] Etapa 9 — empacotamento: instalador NSIS por usuário com FFmpeg embutido, avisos de licença e
+      ícone próprio; build de release validado sem FFmpeg no PATH (ver pendências de distribuição)

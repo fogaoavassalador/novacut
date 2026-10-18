@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run build && npm run prepare-ffmpeg && npm run notices",
     "frontendDist": "../dist"
   },
   "app": {
@@ -30,13 +30,29 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
+    "publisher": "NovaCut",
+    "copyright": "© 2026 NovaCut",
+    "category": "Video",
+    "shortDescription": "Editor de vídeo para Windows",
+    "longDescription": "NovaCut é um editor de vídeo desktop: importação de mídias, timeline com várias faixas, pré-visualização, ajustes por clipe e exportação MP4 com FFmpeg.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": {
+      "ffmpeg/*": "ffmpeg/",
+      "licenses/*": "licenses/"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["PortugueseBR"],
+        "displayLanguageSelector": false
+      }
+    }
   }
 }

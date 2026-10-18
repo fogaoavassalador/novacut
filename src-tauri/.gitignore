@@ -8,3 +8,9 @@
 
 # Build separado usado pelos testes E2E (não sobrescreve o app em uso)
 /target-e2e/
+
+# Gerados por npm run prepare-ffmpeg / npm run notices (não versionados)
+/ffmpeg/*
+!/ffmpeg/.gitkeep
+/licenses/*
+!/licenses/.gitkeep

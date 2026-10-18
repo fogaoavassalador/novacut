@@ -177,6 +177,14 @@ pub fn with_commands<R: tauri::Runtime>(builder: tauri::Builder<R>) -> tauri::Bu
 pub fn run() {
     with_commands(tauri::Builder::default())
         .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            // FFmpeg distribuído com o instalador (pasta de recursos `ffmpeg/`).
+            use tauri::Manager;
+            if let Ok(dir) = app.path().resource_dir() {
+                ffmpeg::set_bundled_dir(dir.join("ffmpeg"));
+            }
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
