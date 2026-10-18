@@ -12,10 +12,12 @@ interface TopBarProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onExport: () => void;
+  canExport: boolean;
 }
 
 export function TopBar(props: TopBarProps) {
-  const { doc, onNew, onOpen, onSave, onSaveAs, onRename, onUndo, onRedo, canUndo, canRedo } = props;
+  const { doc, onNew, onOpen, onSave, onSaveAs, onRename, onUndo, onRedo, canUndo, canRedo, onExport, canExport } = props;
   const [draft, setDraft] = useState(doc.project.name);
   useEffect(() => setDraft(doc.project.name), [doc.project.name]);
 
@@ -66,6 +68,14 @@ export function TopBar(props: TopBarProps) {
       <span className="file-path" title={doc.filePath ?? undefined}>
         {doc.filePath ?? "Ainda não salvo em disco"}
       </span>
+      <button
+        className="primary export-open"
+        onClick={onExport}
+        disabled={!canExport}
+        title={canExport ? "Exportar vídeo MP4 (Ctrl+E)" : "Adicione clipes à timeline para exportar"}
+      >
+        Exportar
+      </button>
     </header>
   );
 }

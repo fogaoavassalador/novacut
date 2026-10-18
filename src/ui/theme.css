@@ -833,3 +833,139 @@ button:disabled:hover {
   align-self: flex-start;
   margin-top: 4px;
 }
+/* ---- Diálogo modal / exportação ---- */
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.primary:hover {
+  background: #3d7bf0;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modal {
+  width: min(560px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  user-select: text;
+}
+
+.modal h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: var(--text-1);
+}
+
+.form-row select,
+.path-input input {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-0);
+  color: var(--text-0);
+  font: inherit;
+}
+
+.path-input {
+  display: flex;
+  gap: 6px;
+}
+
+.path-input input {
+  flex: 1;
+  min-width: 0;
+}
+
+.export-summary {
+  margin: 14px 0 0;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.export-warning {
+  margin: 6px 0 0;
+  color: var(--warn);
+  font-size: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.progress {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--bg-3);
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+
+.export-status {
+  color: var(--text-1);
+  font-family: var(--mono);
+}
+
+.export-result.ok {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.export-result.error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.export-file {
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.export-error {
+  max-height: 200px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: var(--radius);
+  background: var(--bg-0);
+  color: #ffb3b3;
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.topbar .export-open {
+  margin-left: 12px;
+}

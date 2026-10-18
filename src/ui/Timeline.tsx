@@ -37,6 +37,8 @@ interface TimelineProps {
   onEdit: (action: EditAction) => void;
   /** Durante a reprodução, rola a timeline para manter o playhead visível. */
   following?: boolean;
+  /** Desliga os atalhos da timeline (ex.: com um diálogo aberto). */
+  keyboardDisabled?: boolean;
 }
 
 type DragMode = "move" | "trim-start" | "trim-end";
@@ -61,7 +63,16 @@ interface DragState {
   preview: Project | null;
 }
 
-export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, onEdit, following }: TimelineProps) {
+export function Timeline({
+  project,
+  selected,
+  onSelect,
+  playheadUs,
+  onPlayhead,
+  onEdit,
+  following,
+  keyboardDisabled,
+}: TimelineProps) {
   const { tracks, media, settings } = project;
   const fps = settings.fps;
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -70,9 +81,14 @@ export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, 
   const [scrollLeft, setScrollLeft] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const pendingScroll = useRef<number | null>(null);
-  const [drag, setDrag] = useState<DragState | null>(null);
+  const [drag, setDragState] = useState<DragState | null>(null);
+  // A referência é atualizada junto com o estado, nos próprios eventos: se a
+  // renderização atrasar (app ocupado), movimentos e o soltar não se perdem.
   const dragRef = useRef<DragState | null>(null);
-  dragRef.current = drag;
+  const setDrag = (next: DragState | null) => {
+    dragRef.current = next;
+    setDragState(next);
+  };
 
   const durationUs = projectDurationUs(project);
   const contentWidth = Math.max(viewportWidth, usToPx(durationUs + TAIL_US, pxPerSecond));
@@ -237,7 +253,7 @@ export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // Controles de formulário (texto, deslizantes) ficam com as próprias teclas.
-      if (isFormControl(e.target) || e.altKey) return;
+      if (keyboardDisabled || isFormControl(e.target) || e.altKey) return;
       const key = e.key;
       const frame = frameDurationMicros(fps);
       let handled = true;

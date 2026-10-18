@@ -40,17 +40,24 @@ Os testes usam o fixture `samples/e2e.ncproj` (regenerado por `npm run samples`)
 página. Rode-os numa **instância isolada**, com pasta de dados própria do WebView2, para não
 afetar uma janela do NovaCut que você esteja usando:
 
+- `e2e-export.mjs`: diálogo de exportação, encoders detectados, MP4 conferido com `ffprobe`
+  (codec, resolução, fps, duração) e cancelamento no meio sem deixar arquivos.
+
+O build de teste vai para `src-tauri/target-e2e`, para não sobrescrever o `novacut.exe` de uma
+janela em uso:
+
 ```powershell
 npm run samples
 npm run dev                                   # em outro terminal
-cargo build --manifest-path src-tauri/Cargo.toml
+$env:CARGO_TARGET_DIR="src-tauri\target-e2e"; cargo build --manifest-path src-tauri/Cargo.toml; Remove-Item Env:CARGO_TARGET_DIR
 $env:WEBVIEW2_USER_DATA_FOLDER="$env:TEMP\novacut-e2e-webview"
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--remote-debugging-port=9334 --remote-debugging-address=127.0.0.1"
-src-tauri\target\debug\novacut.exe samples\e2e.ncproj
+src-tauri\target-e2e\debug\novacut.exe samples\e2e.ncproj
 $env:CDP_PORT="9334"
 node scripts/e2e-timeline.mjs
 node scripts/e2e-preview.mjs
 node scripts/e2e-properties.mjs
+node scripts/e2e-export.mjs
 ```
 
 ## Pré-visualização
@@ -67,6 +74,24 @@ node scripts/e2e-properties.mjs
   protocolo `asset` (verificado com um tom de 220 Hz).
 - Limitações atuais: o relógio é o do sistema (vídeos são corrigidos se se afastarem mais de
   120 ms); o cache de proxies não é limpo automaticamente.
+
+## Exportação (MP4)
+
+`Exportar` (ou `Ctrl+E`) abre o diálogo: arquivo, resolução (do projeto ou reduzida na mesma
+proporção), codificador e qualidade (taxa de bits proporcional à área do quadro).
+
+- `core/export/ffmpegArgs.ts` gera a linha de comando a partir do projeto, com as **mesmas regras
+  da pré-visualização**: camadas de V1 para cima, mídia ajustada e centralizada, brilho/contraste
+  via `lutrgb` (mesma fórmula do CSS), velocidade (`setpts` + cadeia de `atempo`), volume e mix de
+  áudio sem normalização. Cada clipe é uma entrada com `-ss/-t`; caminhos nunca entram no filtro.
+- Só são oferecidos codificadores que **funcionam nesta máquina** (cada um codifica um vídeo de teste
+  minúsculo na primeira abertura), em ordem de preferência: GPU AMD/NVIDIA/Intel, Media Foundation,
+  OpenH264.
+- O backend (`export.rs`) roda o FFmpeg sem janela de console, lê `-progress pipe:1` (barra, velocidade
+  e tempo restante) e grava num arquivo temporário ao lado do destino: o MP4 final só aparece se
+  tudo der certo. Cancelar ou falhar apaga o temporário.
+- Um teste de integração exporta um projeto sintético de verdade e confere pixels (camadas,
+  centralização, brilho/contraste, velocidade) e níveis de áudio (silêncio, posição, +6 dB a 200%).
 
 ## Painel de propriedades
 
@@ -90,6 +115,7 @@ contraste em áudio).
 | Rolar a timeline | roda do mouse |
 | Cancelar arraste | `Esc` |
 | Reproduzir / pausar | `Espaço` |
+| Exportar | `Ctrl+E` |
 
 ## Arquitetura
 
@@ -151,5 +177,5 @@ e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `
       velocidade, brilho/contraste por CSS, proxies automáticos
 - [x] Etapa 7 — painel de propriedades: volume (com ganho real acima de 100% na pré-visualização),
       velocidade, brilho e contraste
-- [ ] Etapa 8 — exportação MP4
+- [x] Etapa 8 — exportação MP4: gerador de argumentos, encoders testados, progresso, cancelamento
 - [ ] Etapa 9 — empacotamento com FFmpeg e licenças

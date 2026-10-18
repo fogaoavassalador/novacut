@@ -8,6 +8,7 @@ import { useMediaSources } from "./state/useMediaSources";
 import { usePlayback } from "./state/usePlayback";
 import { useProjectDocument } from "./state/useProjectDocument";
 import { MediaLibrary } from "./ui/MediaLibrary";
+import { ExportDialog } from "./ui/ExportDialog";
 import { PreviewPlayer } from "./ui/PreviewPlayer";
 import { PropertiesPanel } from "./ui/PropertiesPanel";
 import { resumeAudio } from "./platform/audioGraph";
@@ -60,9 +61,22 @@ export default function App() {
     setPlayheadUs(0);
   }, [doc.project.id, pause]);
 
-  // Espaço: reproduzir / pausar (fora de campos de texto).
+  const [exportOpen, setExportOpen] = useState(false);
+  const openExport = useCallback(() => {
+    if (durationUs === 0) return;
+    pause();
+    setExportOpen(true);
+  }, [durationUs, pause]);
+
+  // Espaço: reproduzir / pausar (fora de campos de texto). Ctrl+E: exportar.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (exportOpen) return; // com o diálogo aberto, o teclado é dele
+      if (e.ctrlKey && !e.altKey && e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        openExport();
+        return;
+      }
       if (e.code !== "Space" || e.ctrlKey || e.altKey) return;
       if (isTextEntry(e.target)) return;
       e.preventDefault();
@@ -70,7 +84,7 @@ export default function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggle]);
+  }, [toggle, exportOpen, openExport]);
 
   useEffect(() => {
     if (!doc.lastError) return;
@@ -91,6 +105,8 @@ export default function App() {
         onRedo={redo}
         canUndo={canUndo(doc)}
         canRedo={canRedo(doc)}
+        onExport={openExport}
+        canExport={durationUs > 0}
       />
 
       <main className="workspace">
@@ -159,6 +175,7 @@ export default function App() {
           onPlayhead={setPlayheadUs}
           onEdit={edit}
           following={playing}
+          keyboardDisabled={exportOpen}
         />
         {doc.lastError && (
           <div className="edit-error" role="alert" onClick={clearError}>
@@ -168,6 +185,10 @@ export default function App() {
       </div>
 
       <StatusBar />
+
+      {exportOpen && (
+        <ExportDialog project={doc.project} projectPath={doc.filePath} onClose={() => setExportOpen(false)} />
+      )}
     </div>
   );
 }
