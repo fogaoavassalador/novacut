@@ -66,8 +66,79 @@ body {
   color: var(--accent);
 }
 
-.project-name {
-  color: var(--text-1);
+.file-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+button {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--text-0);
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--bg-3);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.project-name-input {
+  width: 260px;
+  height: 28px;
+  margin-left: 12px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-0);
+  font: inherit;
+  font-weight: 600;
+}
+
+.project-name-input:hover,
+.project-name-input:focus {
+  border-color: var(--border);
+  background: var(--bg-0);
+}
+
+.dirty-flag {
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(245, 184, 74, 0.15);
+  color: var(--warn);
+  font-size: 11px;
+}
+
+.file-path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 12px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+}
+
+.panel-header-meta {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-2);
 }
 
 .workspace {

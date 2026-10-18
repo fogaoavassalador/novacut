@@ -26,13 +26,29 @@ npm run build        # typecheck + build do frontend
 ```
 src/core/       lógica pura, sem React nem Tauri (testada com Vitest)
   time.ts         tempo em microssegundos inteiros, frames e timecode
+  project/        formato .ncproj: schema (zod), invariantes, serializar/ler, migrações
   timeline/       régua (e, nas próximas etapas, operações de timeline)
-src/platform/   adaptadores para comandos Tauri (ffmpeg.ts)
+src/state/      documento aberto (reducer puro) e hook que liga diálogos e arquivos
+src/platform/   adaptadores para comandos Tauri (ffmpeg.ts, projectFiles.ts)
 src/ui/         componentes React e tema escuro
-src-tauri/src/  backend Rust: localização/diagnóstico do FFmpeg (ffmpeg.rs)
+src-tauri/src/  backend Rust: FFmpeg (ffmpeg.rs), E/S atômica de projetos (project.rs)
+src-tauri/tests/ teste de IPC ponta a ponta com o runtime de teste do Tauri
 ```
 
 Regra: o modelo nunca guarda tempo em segundos `float`; tudo é `Micros` (inteiro).
+
+## Formato de projeto (.ncproj)
+
+JSON UTF-8 com `format: "novacut-project"` e `formatVersion` (atual: 1). Contém `settings`
+(resolução, fps, taxa de amostragem, fundo), `media` (arquivos referenciados por caminho absoluto)
+e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `mediaId`.
+
+- Ao abrir, o arquivo passa pelo schema e por invariantes: ids únicos, mídias existentes,
+  `sourceOutUs > sourceInUs`, trecho dentro da duração da mídia, sem sobreposição na mesma
+  faixa e tipo de mídia compatível com a faixa.
+- Arquivos de versão mais nova são recusados com mensagem clara; versões antigas passam pela
+  cadeia de migrações em `serialize.ts`.
+- Um projeto inconsistente nunca é gravado. A gravação é atômica (`.tmp` + `fsync` + rename).
 
 ## FFmpeg e licenças
 
@@ -50,7 +66,8 @@ Regra: o modelo nunca guarda tempo em segundos `float`; tudo é `Micros` (inteir
 ## Estado
 
 - [x] Etapa 1 — estrutura do projeto, casca da UI em tema escuro, diagnóstico do FFmpeg
-- [ ] Etapa 2 — formato de projeto `.ncproj` (salvar/abrir)
+- [x] Etapa 2 — formato de projeto `.ncproj` (novo/abrir/salvar/salvar como, atalhos, aviso de
+      alterações não salvas)
 - [ ] Etapa 3 — importação + ffprobe + biblioteca de mídias
 - [ ] Etapa 4 — modelo da timeline (adicionar, mover, cortar, dividir, desfazer)
 - [ ] Etapa 5 — interação da timeline

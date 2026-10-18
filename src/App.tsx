@@ -1,26 +1,24 @@
 import { formatTimecode } from "./core/time";
+import { useProjectDocument } from "./state/useProjectDocument";
 import { StatusBar } from "./ui/StatusBar";
 import { Timeline } from "./ui/Timeline";
+import { TopBar } from "./ui/TopBar";
 import "./ui/theme.css";
 
-const FPS = 30;
-
-// Faixas iniciais fixas até o modelo de projeto existir (etapa 2).
-const DEFAULT_TRACKS = [
-  { id: "v2", label: "V2", kind: "video" as const },
-  { id: "v1", label: "V1", kind: "video" as const },
-  { id: "a1", label: "A1", kind: "audio" as const },
-];
-
 export default function App() {
+  const { doc, newProject, openProject, saveProject, saveAs, rename } = useProjectDocument();
+  const { settings, tracks } = doc.project;
+
   return (
     <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          Nova<span>Cut</span>
-        </div>
-        <div className="project-name">Projeto sem título</div>
-      </header>
+      <TopBar
+        doc={doc}
+        onNew={newProject}
+        onOpen={openProject}
+        onSave={saveProject}
+        onSaveAs={saveAs}
+        onRename={rename}
+      />
 
       <main className="workspace">
         <section className="panel" aria-label="Biblioteca de mídias">
@@ -34,11 +32,19 @@ export default function App() {
         </section>
 
         <section className="panel" aria-label="Pré-visualização">
-          <div className="panel-header">Pré-visualização</div>
+          <div className="panel-header">
+            Pré-visualização
+            <span className="panel-header-meta">
+              {settings.width}×{settings.height} · {settings.fps} fps
+            </span>
+          </div>
           <div className="panel-body">
             <div className="preview-stage">
-              <div className="preview-frame">
-                <span className="preview-timecode">{formatTimecode(0, FPS)}</span>
+              <div
+                className="preview-frame"
+                style={{ aspectRatio: `${settings.width} / ${settings.height}`, background: settings.background }}
+              >
+                <span className="preview-timecode">{formatTimecode(0, settings.fps)}</span>
               </div>
             </div>
           </div>
@@ -55,7 +61,13 @@ export default function App() {
         </section>
       </main>
 
-      <Timeline tracks={DEFAULT_TRACKS} fps={FPS} pxPerSecond={60} scrollUs={0} playheadUs={0} />
+      <Timeline
+        tracks={tracks.map((t) => ({ id: t.id, label: t.name, kind: t.kind }))}
+        fps={settings.fps}
+        pxPerSecond={60}
+        scrollUs={0}
+        playheadUs={0}
+      />
 
       <StatusBar />
     </div>
