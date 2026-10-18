@@ -24,10 +24,14 @@ npm run samples      # gera mídias sintéticas + samples/demo.ncproj (fora do G
 
 Um projeto também pode ser aberto pela linha de comando: `novacut.exe caminho\projeto.ncproj`.
 
-### Teste E2E da timeline
+### Testes E2E
 
-`scripts/e2e-timeline.mjs` dirige o app real pelo protocolo de depuração do WebView2 (CDP, só em
-127.0.0.1) e verifica selecionar, arrastar, cortar, dividir, excluir, desfazer e zoom:
+Os scripts em `scripts/` dirigem o app real pelo protocolo de depuração do WebView2 (CDP, só em
+127.0.0.1); os eventos de mouse e teclado vão apenas para a página do NovaCut.
+
+- `e2e-timeline.mjs`: selecionar, arrastar, cortar, dividir, excluir, desfazer, zoom.
+- `e2e-preview.mjs`: decodificação via protocolo `asset`, posição de cada mídia no playhead,
+  ordem das camadas, reprodução em sincronia, parada no fim e proxy automático de GIF.
 
 ```powershell
 npm run samples
@@ -36,7 +40,21 @@ cargo build --manifest-path src-tauri/Cargo.toml
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--remote-debugging-port=9333 --remote-debugging-address=127.0.0.1"
 src-tauri\target\debug\novacut.exe samples\demo.ncproj
 node scripts/e2e-timeline.mjs
+node scripts/e2e-preview.mjs
 ```
+
+## Pré-visualização
+
+- Os arquivos de mídia são lidos pelo protocolo `asset` do Tauri, com escopo **dinâmico**: o
+  escopo começa vazio e cada mídia do projeto é autorizada ao ser importada ou aberta.
+- Cada clipe ativo (ou que começa nos próximos 2 s) tem seu `<video>`/`<audio>`/`<img>`; as
+  regras de "o que aparece em t" estão em `core/preview/composition.ts` e valem também para a
+  exportação.
+- Formatos que o WebView2 não toca (GIF, ProRes, alguns MKV…) recebem um **proxy** H.264 de até
+  1280 px em `%LOCALAPPDATA%\com.novacut.app\proxies`, usado só na pré-visualização.
+- Limitações atuais: o relógio é o do sistema (vídeos são corrigidos se se afastarem mais de
+  120 ms); volume acima de 100% ainda não é audível na pré-visualização; o cache de proxies não é
+  limpo automaticamente.
 
 ## Atalhos da timeline
 
@@ -50,6 +68,7 @@ node scripts/e2e-timeline.mjs
 | Zoom | `Ctrl`+roda (no ponteiro), `+` / `−`, botão Ajustar |
 | Rolar a timeline | roda do mouse |
 | Cancelar arraste | `Esc` |
+| Reproduzir / pausar | `Espaço` |
 
 ## Arquitetura
 
@@ -107,7 +126,8 @@ e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `
       clipes exibidos na timeline, duplo clique em mídia adiciona ao fim da faixa
 - [x] Etapa 5 — interação da timeline: seleção, arrastar entre faixas com encaixe, cortar pelas
       bordas, dividir no playhead, excluir, zoom e rolagem, playhead pela régua
-- [ ] Etapa 6 — motor de pré-visualização
+- [x] Etapa 6 — motor de pré-visualização: reprodução sincronizada (Espaço), camadas, áudio,
+      velocidade, brilho/contraste por CSS, proxies automáticos
 - [ ] Etapa 7 — propriedades: volume, velocidade, brilho, contraste
 - [ ] Etapa 8 — exportação MP4
 - [ ] Etapa 9 — empacotamento com FFmpeg e licenças

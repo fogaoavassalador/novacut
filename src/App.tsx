@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { newId } from "./core/project/project";
+import { newId, projectDurationUs } from "./core/project/project";
 import { formatTimecode, type Micros } from "./core/time";
 import { pruneSelection } from "./core/timeline/selection";
 import { canRedo, canUndo } from "./state/document";
 import { useMediaImport } from "./state/useMediaImport";
+import { useMediaSources } from "./state/useMediaSources";
+import { usePlayback } from "./state/usePlayback";
 import { useProjectDocument } from "./state/useProjectDocument";
 import { MediaLibrary } from "./ui/MediaLibrary";
+import { PreviewPlayer } from "./ui/PreviewPlayer";
 import { StatusBar } from "./ui/StatusBar";
 import { Timeline } from "./ui/Timeline";
 import { TopBar } from "./ui/TopBar";
@@ -35,8 +38,30 @@ export default function App() {
   const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
   const [playheadUs, setPlayheadUs] = useState<Micros>(0);
 
+  const durationUs = projectDurationUs(doc.project);
+  const { playing, toggle, pause } = usePlayback(durationUs, playheadUs, setPlayheadUs);
+  const { sources, requestProxy } = useMediaSources(doc.project.media);
+
   // Clipes que deixaram de existir (desfazer, excluir, abrir outro projeto) saem da seleção.
   useEffect(() => setSelected((s) => pruneSelection(doc.project, s)), [doc.project]);
+
+  // Outro projeto aberto: para a reprodução e volta ao início.
+  useEffect(() => {
+    pause();
+    setPlayheadUs(0);
+  }, [doc.project.id, pause]);
+
+  // Espaço: reproduzir / pausar (fora de campos de texto).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== "Space" || e.ctrlKey || e.altKey) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      e.preventDefault();
+      toggle();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggle]);
 
   useEffect(() => {
     if (!doc.lastError) return;
@@ -76,14 +101,34 @@ export default function App() {
               {settings.width}×{settings.height} · {settings.fps} fps
             </span>
           </div>
-          <div className="panel-body">
+          <div className="panel-body preview-body">
             <div className="preview-stage">
-              <div
-                className="preview-frame"
-                style={{ aspectRatio: `${settings.width} / ${settings.height}`, background: settings.background }}
+              <PreviewPlayer
+                project={doc.project}
+                playheadUs={playheadUs}
+                playing={playing}
+                sources={sources}
+                onUnsupported={requestProxy}
+              />
+            </div>
+            <div className="preview-controls">
+              <button
+                className="play-button"
+                onClick={(e) => {
+                  toggle();
+                  e.currentTarget.blur(); // a barra de espaço não deve "clicar" o botão de novo
+                }}
+                disabled={durationUs === 0}
+                title="Reproduzir / pausar (Espaço)"
+                aria-label={playing ? "Pausar" : "Reproduzir"}
               >
-                <span className="preview-timecode">{formatTimecode(playheadUs, settings.fps)}</span>
-              </div>
+                {playing ? "❚❚" : "▶"}
+              </button>
+              <span className="preview-time">
+                <span className="preview-time-current">{formatTimecode(playheadUs, settings.fps)}</span>
+                {" / "}
+                {formatTimecode(durationUs, settings.fps)}
+              </span>
             </div>
           </div>
         </section>
@@ -107,6 +152,7 @@ export default function App() {
           playheadUs={playheadUs}
           onPlayhead={setPlayheadUs}
           onEdit={edit}
+          following={playing}
         />
         {doc.lastError && (
           <div className="edit-error" role="alert" onClick={clearError}>

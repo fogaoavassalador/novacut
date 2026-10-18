@@ -34,6 +34,8 @@ interface TimelineProps {
   playheadUs: Micros;
   onPlayhead: (us: Micros) => void;
   onEdit: (action: EditAction) => void;
+  /** Durante a reprodução, rola a timeline para manter o playhead visível. */
+  following?: boolean;
 }
 
 type DragMode = "move" | "trim-start" | "trim-end";
@@ -58,7 +60,7 @@ interface DragState {
   preview: Project | null;
 }
 
-export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, onEdit }: TimelineProps) {
+export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, onEdit, following }: TimelineProps) {
   const { tracks, media, settings } = project;
   const fps = settings.fps;
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -127,6 +129,14 @@ export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, 
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, [zoomBy]);
+
+  // Página a timeline quando o playhead sai da área visível durante a reprodução.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!following || !el) return;
+    const x = usToPx(playheadUs, pxPerSecond);
+    if (x < el.scrollLeft || x > el.scrollLeft + el.clientWidth - 24) el.scrollLeft = Math.max(0, x - 24);
+  }, [following, playheadUs, pxPerSecond]);
 
   // ---------- playhead ----------
   const timeAtClientX = (clientX: number) => {
@@ -355,6 +365,7 @@ export function Timeline({ project, selected, onSelect, playheadUs, onPlayhead, 
                           width: Math.max(2, usToPx(clipDurationUs(clip), pxPerSecond)),
                         }}
                         title={`${m?.name ?? "mídia ausente"} · ${(clipDurationUs(clip) / US_PER_SECOND).toFixed(2)} s`}
+                        data-clip-id={clip.id}
                         data-clip-name={m?.name}
                         data-start-us={clip.timelineStartUs}
                         data-end-us={clipEndUs(clip)}

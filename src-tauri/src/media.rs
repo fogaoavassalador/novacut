@@ -231,6 +231,63 @@ pub fn thumbnail(path: &Path, at_us: u64) -> Result<Vec<u8>, String> {
     Ok(jpeg)
 }
 
+// ---------------- proxies de pré-visualização ----------------
+
+/// Encoders de software para proxies, em ordem de preferência. São usados
+/// apenas na pré-visualização; a exportação lê sempre o arquivo original.
+const PROXY_ENCODERS: &[&str] = &["libopenh264", "h264_mf"];
+const PROXY_TIMEOUT: Duration = Duration::from_secs(30 * 60);
+pub const PROXY_MAX_WIDTH: u32 = 1280;
+
+/// Nome do proxy: depende do caminho, tamanho e data de modificação do
+/// original, para que um arquivo alterado gere um proxy novo.
+pub fn proxy_file_name(source: &Path) -> Result<String, String> {
+    use std::hash::{Hash, Hasher};
+    let meta = std::fs::metadata(source).map_err(|e| format!("arquivo inacessível: {e}"))?;
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    source.hash(&mut h);
+    meta.len().hash(&mut h);
+    meta.modified().ok().hash(&mut h);
+    Ok(format!("{:016x}.mp4", h.finish()))
+}
+
+/// Garante um proxy H.264/AAC (MP4, até `PROXY_MAX_WIDTH` px) em `cache_dir`.
+/// Se já existir, devolve-o sem reprocessar.
+pub fn ensure_proxy(source: &Path, cache_dir: &Path) -> Result<std::path::PathBuf, String> {
+    require_file(source)?;
+    std::fs::create_dir_all(cache_dir).map_err(|e| format!("não foi possível criar o cache: {e}"))?;
+    let target = cache_dir.join(proxy_file_name(source)?);
+    if target.is_file() {
+        return Ok(target);
+    }
+    let ffmpeg_bin = ffmpeg::locate("ffmpeg").ok_or("ffmpeg não encontrado")?;
+    let available = ffmpeg::status().h264_encoders;
+    let encoder = PROXY_ENCODERS
+        .iter()
+        .find(|e| available.iter().any(|a| a == *e))
+        .ok_or("nenhum encoder H.264 disponível para gerar o proxy")?;
+
+    let tmp = target.with_extension("part.mp4");
+    let vf = format!("scale='min({PROXY_MAX_WIDTH},iw)':-2,format=yuv420p");
+    let args: Vec<&OsStr> = vec![
+        "-v".as_ref(), "error".as_ref(), "-y".as_ref(),
+        "-i".as_ref(), source.as_os_str(),
+        "-map".as_ref(), "0:v:0".as_ref(), "-map".as_ref(), "0:a:0?".as_ref(),
+        "-vf".as_ref(), vf.as_ref(),
+        "-c:v".as_ref(), encoder.as_ref(), "-b:v".as_ref(), "4M".as_ref(),
+        "-c:a".as_ref(), "aac".as_ref(), "-b:a".as_ref(), "160k".as_ref(),
+        "-movflags".as_ref(), "+faststart".as_ref(),
+        tmp.as_os_str(),
+    ];
+    let result = ffmpeg::run_with_timeout(&ffmpeg_bin, &args, PROXY_TIMEOUT)
+        .and_then(|_| std::fs::rename(&tmp, &target).map_err(|e| e.to_string()));
+    if let Err(e) = result {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(format!("falha ao gerar proxy: {e}"));
+    }
+    Ok(target)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

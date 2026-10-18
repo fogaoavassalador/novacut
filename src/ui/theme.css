@@ -684,3 +684,72 @@ button:disabled {
 button:disabled:hover {
   background: var(--bg-2);
 }
+/* ---- Pré-visualização ---- */
+.preview-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-body .preview-stage {
+  flex: 1;
+  min-height: 0;
+  container-type: size;
+}
+
+/* Maior quadro com a proporção do projeto (--ar) que cabe no palco. */
+.preview-frame {
+  overflow: hidden;
+  width: min(100cqw, 100cqh * var(--ar, 1.7778));
+  max-height: none;
+}
+
+.preview-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.preview-message {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--text-2);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.preview-message.error {
+  color: var(--danger);
+}
+
+.preview-controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 40px;
+  border-top: 1px solid var(--border);
+}
+
+.play-button {
+  width: 36px;
+  padding: 0;
+  font-size: 13px;
+}
+
+.preview-time {
+  font-family: var(--mono);
+  color: var(--text-2);
+}
+
+.preview-time-current {
+  color: var(--text-0);
+}

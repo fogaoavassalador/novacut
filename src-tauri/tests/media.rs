@@ -83,6 +83,43 @@ fn rejects_non_media_and_missing_files() {
 }
 
 #[test]
+fn proxy_converts_gif_and_large_video_to_playable_h264() {
+    if !ffmpeg_available() {
+        return;
+    }
+    let dir = tempfile::tempdir().unwrap();
+    let cache = dir.path().join("cache");
+    let gif = generate(dir.path(), "a.gif", &["-f", "lavfi", "-i", "testsrc2=size=320x180:rate=10:duration=2"]);
+    let big = generate(
+        dir.path(),
+        "big.mp4",
+        &[
+            "-f", "lavfi", "-i", "testsrc2=size=2560x1440:rate=30:duration=1",
+            "-f", "lavfi", "-i", "sine=duration=1",
+            "-c:v", "libopenh264", "-c:a", "aac", "-shortest",
+        ],
+    );
+
+    let p = media::ensure_proxy(&gif, &cache).unwrap();
+    let probe = media::probe(&p).unwrap();
+    assert_eq!(probe.video_codec.as_deref(), Some("h264"));
+    assert_eq!((probe.width, probe.height), (Some(320), Some(180)));
+    assert!(!probe.has_audio);
+
+    let p2 = media::ensure_proxy(&big, &cache).unwrap();
+    let probe2 = media::probe(&p2).unwrap();
+    assert_eq!((probe2.width, probe2.height), (Some(media::PROXY_MAX_WIDTH), Some(720)));
+    assert_eq!(probe2.audio_codec.as_deref(), Some("aac"));
+
+    // Segunda chamada reaproveita o arquivo (mesmo caminho, sem reprocessar).
+    let modified = std::fs::metadata(&p2).unwrap().modified().unwrap();
+    assert_eq!(media::ensure_proxy(&big, &cache).unwrap(), p2);
+    assert_eq!(std::fs::metadata(&p2).unwrap().modified().unwrap(), modified);
+    // Nenhum arquivo temporário sobra no cache.
+    assert!(std::fs::read_dir(&cache).unwrap().all(|e| !e.unwrap().file_name().to_string_lossy().contains(".part")));
+}
+
+#[test]
 fn thumbnails_are_jpeg_with_expected_width() {
     if !ffmpeg_available() {
         return;

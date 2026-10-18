@@ -1,48 +1,8 @@
-// Teste ponta a ponta da interação da timeline no app real (WebView2 via CDP).
-//
-// Pré-requisitos (ver README, seção "Teste E2E da timeline"):
-//   1. npm run samples
-//   2. npm run dev                      (Vite em http://localhost:1420)
-//   3. app de debug aberto com o projeto de demonstração e a porta CDP local:
-//        $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--remote-debugging-port=9333 --remote-debugging-address=127.0.0.1"
-//        src-tauri\target\debug\novacut.exe samples\demo.ncproj
-//   4. node scripts/e2e-timeline.mjs
-//
-// Os eventos de mouse/teclado vão apenas para a página do NovaCut (não para o desktop).
+// Teste ponta a ponta da interação da timeline no app real (ver README, "Testes E2E").
+import { connect, CTRL, S, sleep } from "./cdp.mjs";
 
-const PORT = process.env.CDP_PORT ?? 9333;
-const S = 1_000_000;
-
-const targets = await (await fetch(`http://127.0.0.1:${PORT}/json`)).json();
-const page = targets.find((t) => t.type === "page" && t.url.startsWith("http://localhost:1420"));
-if (!page) throw new Error("página do NovaCut não encontrada na porta CDP");
-
-const ws = new WebSocket(page.webSocketDebuggerUrl);
-await new Promise((resolve, reject) => {
-  ws.onopen = resolve;
-  ws.onerror = reject;
-});
-let nextId = 0;
-const pending = new Map();
-ws.onmessage = (e) => {
-  const m = JSON.parse(e.data);
-  const p = pending.get(m.id);
-  if (!p) return;
-  pending.delete(m.id);
-  m.error ? p.reject(new Error(m.error.message)) : p.resolve(m.result);
-};
-const send = (method, params = {}) =>
-  new Promise((resolve, reject) => {
-    const id = ++nextId;
-    pending.set(id, { resolve, reject });
-    ws.send(JSON.stringify({ id, method, params }));
-  });
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function evaluate(expression) {
-  const r = await send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true });
-  if (r.exceptionDetails) throw new Error(r.exceptionDetails.text);
-  return r.result.value;
-}
+const { send, evaluate, click, drag, key, reloadDemo, check, finish } = await connect();
+await reloadDemo();
 
 // ---------- leitura do estado pela DOM ----------
 const clips = () =>
@@ -52,56 +12,10 @@ const clips = () =>
 const clipNamed = async (name, nth = 0) => (await clips()).filter((c) => c.name === name)[nth];
 const pps = async () => parseFloat(await evaluate(`document.querySelector('.toolbar-zoom').textContent`));
 const timecode = () => evaluate(`document.querySelector('.toolbar-timecode').textContent`);
-
-// ---------- entrada ----------
-const mouse = (type, x, y, extra = {}) =>
-  send("Input.dispatchMouseEvent", { type, x, y, button: "left", clickCount: 1, buttons: type === "mouseReleased" ? 0 : 1, ...extra });
-async function click(x, y, modifiers = 0) {
-  await mouse("mouseMoved", x, y, { buttons: 0, button: "none" });
-  await mouse("mousePressed", x, y, { modifiers });
-  await mouse("mouseReleased", x, y, { modifiers });
-  await sleep(60);
-}
-async function drag(x0, y0, x1, y1, { midCheck } = {}) {
-  await mouse("mouseMoved", x0, y0, { buttons: 0, button: "none" });
-  await mouse("mousePressed", x0, y0);
-  const steps = 10;
-  let mid;
-  for (let i = 1; i <= steps; i++) {
-    await mouse("mouseMoved", x0 + ((x1 - x0) * i) / steps, y0 + ((y1 - y0) * i) / steps);
-    await sleep(10);
-  }
-  if (midCheck) mid = await midCheck();
-  await mouse("mouseReleased", x1, y1);
-  await sleep(80);
-  return mid;
-}
-const VK = { s: 83, z: 90, y: 89, Delete: 46 };
-async function key(k, modifiers = 0) {
-  const code = k.length === 1 ? `Key${k.toUpperCase()}` : k;
-  const base = { key: k, code, windowsVirtualKeyCode: VK[k], modifiers };
-  await send("Input.dispatchKeyEvent", { type: "rawKeyDown", ...base });
-  if (k.length === 1 && !modifiers) await send("Input.dispatchKeyEvent", { type: "char", text: k, ...base });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", ...base });
-  await sleep(80);
-}
-const CTRL = 2;
-
-// ---------- verificação ----------
-let failures = 0;
-function check(label, cond, detail = "") {
-  console.log(`${cond ? "ok  " : "FALHA"} ${label}${detail ? ` — ${detail}` : ""}`);
-  if (!cond) failures++;
-}
 const center = (c) => [c.x + c.w / 2, c.y + c.h / 2];
 
 // ---------- cenário ----------
-// Recarrega para partir sempre do projeto de demonstração recém-aberto.
-await send("Page.reload", { ignoreCache: true });
-for (let i = 0; i < 100 && (await evaluate("document.querySelectorAll('.clip').length").catch(() => 0)) < 4; i++)
-  await sleep(100);
-const title = await evaluate("document.title");
-check("projeto de demonstração aberto", (await clips()).length === 4, `título "${title}", ${(await clips()).length} clipes`);
+check("projeto de demonstração aberto", (await clips()).length === 4, `${(await clips()).length} clipes`);
 const z = await pps();
 
 // 1. Selecionar
@@ -192,6 +106,4 @@ check(
   `${fitted} px/s para ${projectEndS} s em ${fitWidth}px`,
 );
 
-console.log(failures ? `\n${failures} verificação(ões) falharam` : "\nTodas as verificações passaram");
-ws.close();
-process.exit(failures ? 1 : 0);
+finish();

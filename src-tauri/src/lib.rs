@@ -42,6 +42,30 @@ async fn media_thumbnail(path: PathBuf, at_us: u64) -> Result<tauri::ipc::Respon
     Ok(tauri::ipc::Response::new(jpeg))
 }
 
+/// Autoriza o WebView a ler estes arquivos pelo protocolo `asset` (pré-visualização).
+/// O escopo começa vazio; só arquivos de mídia existentes do projeto entram.
+#[tauri::command]
+fn allow_media_files<R: tauri::Runtime>(app: tauri::AppHandle<R>, paths: Vec<PathBuf>) -> Result<(), String> {
+    use tauri::Manager;
+    let scope = app.asset_protocol_scope();
+    for p in paths.iter().filter(|p| p.is_file()) {
+        scope.allow_file(p).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+/// Gera (ou reaproveita) o proxy de pré-visualização e já o autoriza no escopo.
+#[tauri::command]
+async fn ensure_proxy<R: tauri::Runtime>(app: tauri::AppHandle<R>, path: PathBuf) -> Result<PathBuf, String> {
+    use tauri::Manager;
+    let cache = app.path().app_cache_dir().map_err(|e| e.to_string())?.join("proxies");
+    let proxy = tauri::async_runtime::spawn_blocking(move || media::ensure_proxy(&path, &cache))
+        .await
+        .map_err(|e| format!("falha interna: {e}"))??;
+    app.asset_protocol_scope().allow_file(&proxy).map_err(|e| e.to_string())?;
+    Ok(proxy)
+}
+
 /// Projeto passado na linha de comando (`novacut.exe projeto.ncproj`), se houver.
 #[tauri::command]
 fn startup_project_path() -> Option<PathBuf> {
@@ -57,7 +81,9 @@ pub fn with_commands<R: tauri::Runtime>(builder: tauri::Builder<R>) -> tauri::Bu
         load_project,
         probe_media,
         media_thumbnail,
-        startup_project_path
+        startup_project_path,
+        allow_media_files,
+        ensure_proxy
     ])
 }
 
