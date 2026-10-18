@@ -65,9 +65,31 @@ pub fn load(path: &Path) -> Result<String, String> {
     String::from_utf8(bytes).map_err(|_| "o arquivo não está em UTF-8".into())
 }
 
+/// Primeiro argumento que seja um arquivo .ncproj existente.
+pub fn startup_path(args: impl IntoIterator<Item = std::ffi::OsString>) -> Option<PathBuf> {
+    args.into_iter()
+        .map(PathBuf::from)
+        .find(|p| check_extension(p).is_ok() && p.is_file())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn startup_path_picks_first_existing_project() {
+        let dir = tempfile::tempdir().unwrap();
+        let real = dir.path().join("a.ncproj");
+        fs::write(&real, "{}").unwrap();
+        let args = vec![
+            "--flag".into(),
+            dir.path().join("nao_existe.ncproj").into_os_string(),
+            dir.path().join("x.txt").into_os_string(),
+            real.clone().into_os_string(),
+        ];
+        assert_eq!(startup_path(args), Some(real));
+        assert_eq!(startup_path(Vec::<std::ffi::OsString>::new()), None);
+    }
 
     #[test]
     fn save_then_load_roundtrip() {

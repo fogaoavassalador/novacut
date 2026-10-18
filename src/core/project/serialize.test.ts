@@ -14,6 +14,7 @@ function video(id: string, durationUs = 10_000_000): MediaRef {
     durationUs,
     width: 1920,
     height: 1080,
+    fps: 30,
     hasVideo: true,
     hasAudio: true,
   };
@@ -43,6 +44,7 @@ function sampleProject(): Project {
     durationUs: null,
     width: 512,
     height: 512,
+    fps: null,
     hasVideo: true,
     hasAudio: false,
   });

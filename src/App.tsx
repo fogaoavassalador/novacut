@@ -1,12 +1,16 @@
 import { formatTimecode } from "./core/time";
+import { useMediaImport } from "./state/useMediaImport";
 import { useProjectDocument } from "./state/useProjectDocument";
+import { MediaLibrary } from "./ui/MediaLibrary";
 import { StatusBar } from "./ui/StatusBar";
 import { Timeline } from "./ui/Timeline";
 import { TopBar } from "./ui/TopBar";
 import "./ui/theme.css";
 
 export default function App() {
-  const { doc, newProject, openProject, saveProject, saveAs, rename } = useProjectDocument();
+  const { doc, newProject, openProject, saveProject, saveAs, rename, addMedia, removeMedia, getProject } =
+    useProjectDocument();
+  const { importState, importFromDialog, dismissFailures } = useMediaImport(getProject, addMedia);
   const { settings, tracks } = doc.project;
 
   return (
@@ -21,15 +25,13 @@ export default function App() {
       />
 
       <main className="workspace">
-        <section className="panel" aria-label="Biblioteca de mídias">
-          <div className="panel-header">Mídias</div>
-          <div className="panel-body">
-            <div className="empty-state">
-              <strong>Biblioteca vazia</strong>
-              A importação de vídeos, imagens e áudios ainda não foi implementada.
-            </div>
-          </div>
-        </section>
+        <MediaLibrary
+          project={doc.project}
+          importState={importState}
+          onImport={importFromDialog}
+          onRemove={removeMedia}
+          onDismissNotice={dismissFailures}
+        />
 
         <section className="panel" aria-label="Pré-visualização">
           <div className="panel-header">

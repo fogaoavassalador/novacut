@@ -2,7 +2,9 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ask, message } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { createEmptyProject } from "../core/project/project";
+import type { MediaRef } from "../core/project/schema";
 import {
+  getStartupProjectPath,
   ProjectFileError,
   pickProjectSavePath,
   pickProjectToOpen,
@@ -17,6 +19,9 @@ import {
   windowTitle,
   withProjectExtension,
 } from "./document";
+
+/** Evita abrir o projeto inicial duas vezes (StrictMode executa efeitos em dobro em dev). */
+let startupHandled = false;
 
 async function showError(title: string, e: unknown) {
   let text = e instanceof Error ? e.message : String(e);
@@ -84,6 +89,20 @@ export function useProjectDocument() {
   }, [confirmDiscard]);
 
   const rename = useCallback((name: string) => dispatch({ type: "rename", name }), []);
+  const addMedia = useCallback((media: MediaRef[]) => dispatch({ type: "addMedia", media }), []);
+  const removeMedia = useCallback((mediaId: string) => dispatch({ type: "removeMedia", mediaId }), []);
+  const getProject = useCallback(() => docRef.current.project, []);
+
+  // Abre o projeto passado na linha de comando, uma única vez por execução.
+  useEffect(() => {
+    if (startupHandled) return;
+    startupHandled = true;
+    getStartupProjectPath()
+      .then(async (path) => {
+        if (path) dispatch({ type: "loaded", project: await readProjectFile(path), filePath: path });
+      })
+      .catch((e) => showError("Não foi possível abrir o projeto", e));
+  }, []);
 
   // Título da janela reflete nome e alterações pendentes.
   useEffect(() => {
@@ -115,5 +134,5 @@ export function useProjectDocument() {
     return () => window.removeEventListener("keydown", onKey);
   }, [newProject, openProject, saveAs, saveProject]);
 
-  return { doc, newProject, openProject, saveProject, saveAs, rename };
+  return { doc, newProject, openProject, saveProject, saveAs, rename, addMedia, removeMedia, getProject };
 }

@@ -19,7 +19,10 @@ npm run tauri dev    # abre o app em modo desenvolvimento
 npm test             # testes do core (Vitest)
 npm run test:rust    # testes do backend (cargo test)
 npm run build        # typecheck + build do frontend
+npm run samples      # gera mídias sintéticas + samples/demo.ncproj (fora do Git)
 ```
+
+Um projeto também pode ser aberto pela linha de comando: `novacut.exe caminho\projeto.ncproj`.
 
 ## Arquitetura
 
@@ -31,8 +34,12 @@ src/core/       lógica pura, sem React nem Tauri (testada com Vitest)
 src/state/      documento aberto (reducer puro) e hook que liga diálogos e arquivos
 src/platform/   adaptadores para comandos Tauri (ffmpeg.ts, projectFiles.ts)
 src/ui/         componentes React e tema escuro
-src-tauri/src/  backend Rust: FFmpeg (ffmpeg.rs), E/S atômica de projetos (project.rs)
-src-tauri/tests/ teste de IPC ponta a ponta com o runtime de teste do Tauri
+  media/          probe → MediaRef, deduplicação por caminho, instante da miniatura
+  util/           mapLimit (concorrência limitada)
+src-tauri/src/  backend Rust: FFmpeg (ffmpeg.rs), análise de mídia e miniaturas (media.rs),
+                E/S atômica de projetos (project.rs)
+src-tauri/tests/ IPC ponta a ponta (tauri::test) e integração com FFmpeg real (mídias sintéticas)
+scripts/        make-samples.mjs
 ```
 
 Regra: o modelo nunca guarda tempo em segundos `float`; tudo é `Micros` (inteiro).
@@ -68,7 +75,7 @@ e `tracks` (faixas; índice 0 = topo) com `clips` que apontam para mídias por `
 - [x] Etapa 1 — estrutura do projeto, casca da UI em tema escuro, diagnóstico do FFmpeg
 - [x] Etapa 2 — formato de projeto `.ncproj` (novo/abrir/salvar/salvar como, atalhos, aviso de
       alterações não salvas)
-- [ ] Etapa 3 — importação + ffprobe + biblioteca de mídias
+- [x] Etapa 3 — importação (diálogo e arrastar-e-soltar) + ffprobe + biblioteca com miniaturas
 - [ ] Etapa 4 — modelo da timeline (adicionar, mover, cortar, dividir, desfazer)
 - [ ] Etapa 5 — interação da timeline
 - [ ] Etapa 6 — motor de pré-visualização

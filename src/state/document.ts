@@ -1,5 +1,6 @@
+import { isMediaInUse, pathKey } from "../core/media/media";
 import { createEmptyProject } from "../core/project/project";
-import { PROJECT_EXTENSION, type Project } from "../core/project/schema";
+import { PROJECT_EXTENSION, type MediaRef, type Project } from "../core/project/schema";
 
 /** O projeto aberto na janela e sua relação com o arquivo em disco. */
 export interface ProjectDocument {
@@ -14,7 +15,11 @@ export type DocumentAction =
   | { type: "new"; project: Project }
   | { type: "loaded"; project: Project; filePath: string }
   | { type: "rename"; name: string }
-  | { type: "saved"; project: Project; filePath: string };
+  | { type: "saved"; project: Project; filePath: string }
+  /** Acrescenta mídias; arquivos já presentes no projeto (mesmo caminho) são ignorados. */
+  | { type: "addMedia"; media: MediaRef[] }
+  /** Remove uma mídia da biblioteca; ignorado se algum clipe a usa. */
+  | { type: "removeMedia"; mediaId: string };
 
 export const DEFAULT_PROJECT_NAME = "Projeto sem título";
 
@@ -35,6 +40,27 @@ export function documentReducer(doc: ProjectDocument, action: DocumentAction): P
     }
     case "saved":
       return { project: action.project, filePath: action.filePath, dirty: false };
+    case "addMedia": {
+      const known = new Set(doc.project.media.map((m) => pathKey(m.path)));
+      const added: MediaRef[] = [];
+      for (const m of action.media) {
+        if (known.has(pathKey(m.path))) continue;
+        known.add(pathKey(m.path));
+        added.push(m);
+      }
+      if (!added.length) return doc;
+      return { ...doc, project: { ...doc.project, media: [...doc.project.media, ...added] }, dirty: true };
+    }
+    case "removeMedia": {
+      const { project } = doc;
+      if (!project.media.some((m) => m.id === action.mediaId) || isMediaInUse(project, action.mediaId))
+        return doc;
+      return {
+        ...doc,
+        project: { ...project, media: project.media.filter((m) => m.id !== action.mediaId) },
+        dirty: true,
+      };
+    }
   }
 }
 

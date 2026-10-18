@@ -127,6 +127,58 @@ pub fn parse_h264_encoders(encoders_output: &str) -> Vec<String> {
         .collect()
 }
 
+/// Executa `program args`, coletando stdout. Mata o processo se passar de `timeout`.
+pub fn run_with_timeout(
+    program: &Path,
+    args: &[&std::ffi::OsStr],
+    timeout: std::time::Duration,
+) -> Result<Vec<u8>, String> {
+    use std::io::Read;
+    use std::process::Stdio;
+
+    let name = program.file_name().unwrap_or_default().to_string_lossy().into_owned();
+    let mut child = command(program)
+        .args(args)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("falha ao executar {name}: {e}"))?;
+
+    // Leitura em threads: se o pipe encher sem ninguém ler, o processo trava.
+    let mut out = child.stdout.take().expect("stdout piped");
+    let mut err = child.stderr.take().expect("stderr piped");
+    let out_t = std::thread::spawn(move || {
+        let mut b = Vec::new();
+        out.read_to_end(&mut b).map(|_| b)
+    });
+    let err_t = std::thread::spawn(move || {
+        let mut s = String::new();
+        let _ = err.read_to_string(&mut s);
+        s
+    });
+
+    let start = std::time::Instant::now();
+    let status = loop {
+        match child.try_wait().map_err(|e| e.to_string())? {
+            Some(status) => break status,
+            None if start.elapsed() > timeout => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err(format!("{name} excedeu o tempo limite de {}s", timeout.as_secs()));
+            }
+            None => std::thread::sleep(std::time::Duration::from_millis(10)),
+        }
+    };
+    let stdout = out_t.join().map_err(|_| "falha ao ler saída".to_string())?.map_err(|e| e.to_string())?;
+    let stderr = err_t.join().unwrap_or_default();
+    if !status.success() {
+        let msg = stderr.lines().rev().find(|l| !l.trim().is_empty()).unwrap_or("erro desconhecido");
+        return Err(format!("{name} falhou: {}", msg.trim()));
+    }
+    Ok(stdout)
+}
+
 fn run_capture(program: &Path, args: &[&str]) -> Result<String, String> {
     let out = command(program)
         .args(args)

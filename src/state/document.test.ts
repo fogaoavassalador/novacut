@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyProject } from "../core/project/project";
+import type { MediaRef } from "../core/project/schema";
 import {
   DEFAULT_PROJECT_NAME,
   documentReducer,
@@ -41,6 +42,77 @@ describe("documentReducer", () => {
     expect(loaded).toEqual({ project: p, filePath: "a.ncproj", dirty: false });
     const fresh = documentReducer(loaded, { type: "new", project: createEmptyProject("N", NOW) });
     expect(fresh.filePath).toBeNull();
+  });
+});
+
+describe("mídias", () => {
+  const media = (id: string, path: string): MediaRef => ({
+    id,
+    kind: "video",
+    path,
+    name: path,
+    durationUs: 1_000_000,
+    width: 10,
+    height: 10,
+    fps: 30,
+    hasVideo: true,
+    hasAudio: false,
+  });
+
+  it("adiciona mídias e marca alteração", () => {
+    const d = documentReducer(initialDocument(), {
+      type: "addMedia",
+      media: [media("a", "C:\\v\\a.mp4"), media("b", "C:\\v\\b.mp4")],
+    });
+    expect(d.project.media.map((m) => m.id)).toEqual(["a", "b"]);
+    expect(d.dirty).toBe(true);
+  });
+
+  it("ignora arquivos já importados, inclusive repetidos no mesmo lote", () => {
+    const d1 = documentReducer(initialDocument(), { type: "addMedia", media: [media("a", "C:\\v\\a.mp4")] });
+    const d2 = documentReducer(d1, {
+      type: "addMedia",
+      media: [media("a2", "c:/V/A.mp4"), media("b", "C:\\v\\b.mp4"), media("b2", "C:\\v\\b.mp4")],
+    });
+    expect(d2.project.media.map((m) => m.id)).toEqual(["a", "b"]);
+    expect(documentReducer(d2, { type: "addMedia", media: [media("x", "C:\\v\\a.mp4")] })).toBe(d2);
+  });
+
+  it("remove mídia sem uso; mantém mídia usada por clipe", () => {
+    let d = documentReducer(initialDocument(), {
+      type: "addMedia",
+      media: [media("a", "a.mp4"), media("b", "b.mp4")],
+    });
+    d = {
+      ...d,
+      project: {
+        ...d.project,
+        tracks: d.project.tracks.map((t, i) =>
+          i === 1
+            ? {
+                ...t,
+                clips: [
+                  {
+                    id: "c",
+                    mediaId: "b",
+                    timelineStartUs: 0,
+                    sourceInUs: 0,
+                    sourceOutUs: 1_000_000,
+                    speed: 1,
+                    volume: 1,
+                    brightness: 1,
+                    contrast: 1,
+                  },
+                ],
+              }
+            : t,
+        ),
+      },
+    };
+    const removed = documentReducer(d, { type: "removeMedia", mediaId: "a" });
+    expect(removed.project.media.map((m) => m.id)).toEqual(["b"]);
+    expect(documentReducer(removed, { type: "removeMedia", mediaId: "b" })).toBe(removed);
+    expect(documentReducer(removed, { type: "removeMedia", mediaId: "nao-existe" })).toBe(removed);
   });
 });
 

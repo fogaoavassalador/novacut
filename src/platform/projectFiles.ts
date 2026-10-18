@@ -15,6 +15,11 @@ export async function pickProjectSavePath(suggestedName: string): Promise<string
   return save({ filters: FILTERS, defaultPath: `${suggestedName}.${PROJECT_EXTENSION}` });
 }
 
+/** Caminho do .ncproj passado na linha de comando ao iniciar o app, se houver. */
+export function getStartupProjectPath(): Promise<string | null> {
+  return invoke<string | null>("startup_project_path");
+}
+
 export class ProjectFileError extends Error {
   constructor(
     message: string,

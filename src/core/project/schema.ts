@@ -35,8 +35,11 @@ export const mediaRefSchema = z.object({
   name: z.string(),
   /** Duração da mídia; `null` para imagens (duração livre). */
   durationUs: micros.nullable(),
+  /** Dimensões de exibição (já com a rotação aplicada). */
   width: z.number().int().positive().nullable(),
   height: z.number().int().positive().nullable(),
+  /** Taxa de quadros média; `null` para áudio e imagens. */
+  fps: z.number().positive().nullable(),
   hasVideo: z.boolean(),
   hasAudio: z.boolean(),
 });
