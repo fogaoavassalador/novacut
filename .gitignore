@@ -25,3 +25,6 @@ dist-ssr
 
 # Mídias sintéticas geradas por npm run samples
 samples/
+
+# Build prÃ³prio do FFmpeg baixado do workflow build-ffmpeg
+ffmpeg-custom/
