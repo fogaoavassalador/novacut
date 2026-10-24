@@ -1,7 +1,8 @@
 {
   "_comment": "Textos de licença de terceiros que não vêm nos pacotes. Baixados por scripts/fetch-licenses.mjs e incluídos por scripts/gen-notices.mjs. Versões do FFmpeg: scripts.d do BtbN FFmpeg-Builds no commit btbnCommit.",
   "ffmpeg": {
-    "build": "n8.1.2-50-g1a748fe2cd-20260831 (win64-lgpl-shared-8.1)",
+    "version": "n8.1.2-50-g1a748fe2cd",
+    "build": "win64-lgpl-shared-8.1 do BtbN (n8.1.2-50-g1a748fe2cd-20260831) ou o build próprio de .github/workflows/build-ffmpeg.yml",
     "btbnRelease": "autobuild-2026-08-31-13-27",
     "btbnCommit": "8267213e26c1031621e6e1210fe3aa4867214f6a",
     "libraries": [
@@ -586,9 +587,13 @@
             "name": "PATENTS",
             "url": "https://raw.githubusercontent.com/xiph/rav1e/564ae3b0007ae2b06893fd7166bf88c5a84c5b63/PATENTS",
             "sha256": "7b14a70c194b19dbd0625e7eac839a63200f67484521ce5e8d8244b127e8907a"
+          },
+          {
+            "name": "rav1e-dependencies-licenses.txt",
+            "generated": "node scripts/rav1e-licenses.mjs <pasta do rav1e>",
+            "sha256": "30fad77a287b672434bfe42a2a7a9090def877d92f815dec1054d565157a2585"
           }
-        ],
-        "pending": "o rav1e é Rust e compila crates de terceiros (ver Cargo.lock do commit); os textos desses crates ainda não estão incluídos"
+        ]
       },
       {
         "id": "snappy",
@@ -1058,7 +1063,8 @@
             "url": "https://raw.githubusercontent.com/acoustid/chromaprint/aed8eba2202dd9d7b3b0a56c77904cc805490d72/LICENSE.md",
             "sha256": "562cfe59627e0c4e8e3b066f3ff2e9736f83811ffe4c6c2c7796595aa7595ebd"
           }
-        ]
+        ],
+        "onlyIf": "chromaprint"
       },
       {
         "id": "ffnvcodec",
@@ -1068,8 +1074,20 @@
         "enables": [
           "ffnvcodec"
         ],
-        "files": [],
-        "note": "só cabeçalhos (carregam o driver NVIDIA em tempo de execução); o repositório não tem arquivo de licença e o texto MIT está nos comentários dos cabeçalhos"
+        "files": [
+          {
+            "name": "nv-codec-headers-LICENSE.txt",
+            "headers": [
+              "https://raw.githubusercontent.com/FFmpeg/nv-codec-headers/eddcea9e27f6b772057c9b3f87de2cc1737faffc/include/ffnvcodec/dynlink_cuda.h",
+              "https://raw.githubusercontent.com/FFmpeg/nv-codec-headers/eddcea9e27f6b772057c9b3f87de2cc1737faffc/include/ffnvcodec/dynlink_cuviddec.h",
+              "https://raw.githubusercontent.com/FFmpeg/nv-codec-headers/eddcea9e27f6b772057c9b3f87de2cc1737faffc/include/ffnvcodec/dynlink_loader.h",
+              "https://raw.githubusercontent.com/FFmpeg/nv-codec-headers/eddcea9e27f6b772057c9b3f87de2cc1737faffc/include/ffnvcodec/dynlink_nvcuvid.h",
+              "https://raw.githubusercontent.com/FFmpeg/nv-codec-headers/eddcea9e27f6b772057c9b3f87de2cc1737faffc/include/ffnvcodec/nvEncodeAPI.h"
+            ],
+            "sha256": "795c5ddc95f17efdd7208063c11662672485030c1bb96a41cfb1ec4457bdc0dc"
+          }
+        ],
+        "note": "só cabeçalhos (carregam o driver NVIDIA em tempo de execução); o repositório não tem arquivo de licença, então o texto MIT foi extraído dos comentários no topo de cada cabeçalho"
       },
       {
         "id": "brotli",
@@ -1281,7 +1299,8 @@
           }
         ],
         "note": "o FFTW3 é GPLv2+ e o BtbN o liga estaticamente ao chromaprint (-DFFT_LIB=fftw3), dentro de avformat-62.dll; por isso esse arquivo combina código GPL com o FFmpeg LGPLv3",
-        "pending": "avformat-62.dll contém o FFTW3 (GPLv2+) por causa do chromaprint, então o FFmpeg embutido não é só LGPLv3. É preciso decidir: distribuir os binários do FFmpeg sob a GPLv3 ou usar um build sem chromaprint"
+        "pending": "avformat-*.dll contém o FFTW3 (GPLv2+) por causa do chromaprint, então este FFmpeg não é só LGPLv3. Troque pelo build de .github/workflows/build-ffmpeg.yml (sem chromaprint)",
+        "onlyIf": "chromaprint"
       },
       {
         "id": "glslang",
@@ -1402,6 +1421,25 @@
           "name": "LICENSE",
           "url": "https://raw.githubusercontent.com/wravery/webview2-rs/dffa41a8a46d3f5565eefbff2de57d38d399f158/LICENSE",
           "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+        }
+      ]
+    },
+    {
+      "crates": [
+        "webview2-com-sys 0.39.1"
+      ],
+      "repo": "https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.3800.47",
+      "commit": "1.0.3800.47",
+      "note": "o crate liga estaticamente o WebView2LoaderStatic.lib do SDK Microsoft Edge WebView2 1.0.3800.47 (alvo MSVC); licença do pacote NuGet (BSD-3-Clause)",
+      "files": [
+        {
+          "name": "WebView2-SDK-LICENSE.txt",
+          "zip": {
+            "url": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg",
+            "size": 8973762,
+            "path": "LICENSE.txt"
+          },
+          "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55"
         }
       ]
     }

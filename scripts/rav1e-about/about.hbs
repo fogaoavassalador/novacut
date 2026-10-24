@@ -1,0 +1,16 @@
+Crates Rust compilados no rav1e (biblioteca estática ligada ao FFmpeg embutido)
+Gerado pelo cargo-about a partir do Cargo.lock do rav1e; ver scripts/rav1e-licenses.mjs.
+
+Crates:
+{{#each crates}}
+  {{{package.name}}} {{{package.version}}} — {{{license}}}{{#if package.repository}} — {{{package.repository}}}{{/if}}
+{{/each}}
+
+{{#each licenses}}
+==============================================================================
+{{{name}}} ({{{id}}})
+Usado por:{{#each used_by}} {{{crate.name}}} {{{crate.version}}}{{#unless @last}},{{/unless}}{{/each}}
+
+{{{text}}}
+
+{{/each}}

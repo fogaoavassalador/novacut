@@ -1,0 +1,85 @@
+# Build próprio do FFmpeg embutido no NovaCut: win64, LGPLv3, shared, SEM chromaprint.
+#
+# O build "lgpl-shared" do BtbN liga o chromaprint ao FFTW3 (GPLv2+), que vai parar em
+# avformat-*.dll. Este workflow usa os mesmos scripts do BtbN FFmpeg-Builds (fixados no commit
+# abaixo, o mesmo das versões listadas em third_party_licenses/sources.json), desliga o chromaprint
+# e o FFTW3, fixa o commit do FFmpeg e falha se alguma DLL ainda contiver o FFTW.
+#
+# Resultado: artefato "ffmpeg-win64-lgpl-shared" com o .zip no formato do BtbN. Para usar:
+# extraia, aponte NOVACUT_FFMPEG_SOURCE para a pasta bin/ e rode npm run prepare-ffmpeg.
+name: build-ffmpeg
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BTBN_COMMIT: 8267213e26c1031621e6e1210fe3aa4867214f6a # release autobuild-2026-08-31-13-27
+  FFMPEG_COMMIT: 1a748fe2cd # n8.1.2-50-g1a748fe2cd (release/8.1)
+  TARGET: win64
+  VARIANT: lgpl-shared
+  ADDIN: "8.1"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Liberar espaço em disco
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker system prune -af
+          df -h /
+
+      - name: Obter os scripts do BtbN FFmpeg-Builds
+        uses: actions/checkout@v4
+        with:
+          repository: BtbN/FFmpeg-Builds
+          ref: ${{ env.BTBN_COMMIT }}
+          path: ffmpeg-builds
+
+      - name: Desligar chromaprint e FFTW3; fixar o commit do FFmpeg
+        working-directory: ffmpeg-builds
+        run: |
+          set -euo pipefail
+          # ffbuild_enabled falso: a etapa não é compilada e o configure recebe --disable-chromaprint
+          for s in scripts.d/50-chromaprint.sh scripts.d/25-fftw3.sh; do
+            perl -0pi -e 's/ffbuild_enabled\(\) \{\n/ffbuild_enabled() {\n    return 1\n/' "$s"
+            grep -A1 'ffbuild_enabled()' "$s"
+          done
+          # o build.sh clona o branch; depois do clone, fixa o commit usado pelo NovaCut
+          perl -pi -e 's/^(\s*)cd ffmpeg$/$1cd ffmpeg\n$1git checkout "$ENV{FFMPEG_COMMIT}"/' build.sh
+          grep -n 'git checkout' build.sh
+
+      - name: Montar a imagem de build
+        working-directory: ffmpeg-builds
+        run: ./makeimage.sh "$TARGET" "$VARIANT" "$ADDIN"
+
+      - name: Compilar o FFmpeg
+        working-directory: ffmpeg-builds
+        run: ./build.sh "$TARGET" "$VARIANT" "$ADDIN"
+
+      - name: Conferir o resultado (sem chromaprint nem FFTW)
+        working-directory: ffmpeg-builds/artifacts
+        run: |
+          set -euo pipefail
+          zip=$(ls ffmpeg-*-"$TARGET"-"$VARIANT"-"$ADDIN".zip)
+          unzip -q "$zip" -d out
+          bin=$(echo out/*/bin)
+          if grep -l -a 'fftw_' "$bin"/*.dll; then echo "FFTW encontrado nas DLLs acima"; exit 1; fi
+          # a configuração fica gravada em avutil; o build precisa ser LGPLv3 e sem chromaprint
+          conf=$(grep -a -o -- '--prefix=/ffbuild/prefix[^"]*' "$bin"/avutil-*.dll | head -1)
+          echo "$conf"
+          case "$conf" in *--enable-chromaprint*|*--enable-gpl*|*--enable-nonfree*) echo "configuração inesperada"; exit 1;; esac
+          case "$conf" in *--enable-version3*) ;; *) echo "faltou --enable-version3 (LGPLv3)"; exit 1;; esac
+          sha256sum "$zip" | tee "$zip.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-${{ env.TARGET }}-${{ env.VARIANT }}
+          path: |
+            ffmpeg-builds/artifacts/*.zip
+            ffmpeg-builds/artifacts/*.sha256
+          if-no-files-found: error

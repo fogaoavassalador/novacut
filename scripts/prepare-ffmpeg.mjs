@@ -38,6 +38,12 @@ const license = flags.has("--enable-gpl") ? "GPL" : flags.has("--enable-version3
 if ((flags.has("--enable-gpl") || flags.has("--enable-nonfree")) && process.env.NOVACUT_ALLOW_GPL !== "1") {
   throw new Error(`o build em ${src} é ${flags.has("--enable-nonfree") ? "nonfree" : "GPL"}; use um build LGPL`);
 }
+// O chromaprint do BtbN vem ligado ao FFTW3 (GPLv2+). O build próprio (.github/workflows/build-ffmpeg.yml) não o tem.
+if (flags.has("--enable-chromaprint")) {
+  const msg = `o build em ${src} tem --enable-chromaprint (no BtbN, ligado ao FFTW3, que é GPL); use o build de .github/workflows/build-ffmpeg.yml`;
+  if (process.env.NOVACUT_STRICT_LICENSES === "1") throw new Error(msg);
+  console.warn(`aviso: ${msg}`);
+}
 
 const files = readdirSync(src).filter((f) => /^(ffmpeg|ffprobe)\.exe$|\.dll$/i.test(f)).sort();
 const manifest = {

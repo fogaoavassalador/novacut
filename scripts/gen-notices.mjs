@@ -129,9 +129,10 @@ const enabled = ff.configuration
 const libs = enabled.filter((f) => f.startsWith("lib")).map((f) => f.slice("lib".length));
 // opções sem o prefixo "lib" que também ligam código de terceiros ao FFmpeg
 const EXTERNAL = new Set(["iconv", "zlib", "fontconfig", "gmp", "lzma", "opencl", "vulkan", "amf", "chromaprint", "ffnvcodec", "lv2", "openal", "sdl2", "vaapi"]);
-const ffLibs = tplSources.ffmpeg.libraries;
-if (!tplSources.ffmpeg.build.startsWith(ff.version)) {
-  warnings.push(`FFmpeg: third_party_licenses/sources.json é do build ${tplSources.ffmpeg.build}, mas o embutido é ${ff.version}; atualize as versões pelos scripts do BtbN`);
+// componentes com "onlyIf" só entram se o build tiver a opção (ex.: FFTW3, só com chromaprint)
+const ffLibs = tplSources.ffmpeg.libraries.filter((l) => !l.onlyIf || enabled.includes(l.onlyIf));
+if (!ff.version.startsWith(tplSources.ffmpeg.version)) {
+  warnings.push(`FFmpeg: third_party_licenses/sources.json é do FFmpeg ${tplSources.ffmpeg.version}, mas o embutido é ${ff.version}; atualize as versões pelos scripts do BtbN`);
 }
 const covered = new Set(ffLibs.flatMap((l) => l.enables ?? []));
 const uncovered = enabled.filter((f) => (f.startsWith("lib") || EXTERNAL.has(f)) && !covered.has(f));
@@ -151,7 +152,7 @@ writeFileSync(
   `${BOM}NovaCut — licenças das bibliotecas de terceiros compiladas no FFmpeg embutido
 Gerado automaticamente por scripts/gen-notices.mjs em ${new Date().toISOString()}.
 
-Build: ${tplSources.ffmpeg.build}
+FFmpeg: ${ff.version}
 Versões: scripts.d do BtbN FFmpeg-Builds, release ${tplSources.ffmpeg.btbnRelease}, commit ${tplSources.ffmpeg.btbnCommit}
 Cada texto foi obtido do repositório da biblioteca no commit indicado.
 
@@ -165,11 +166,18 @@ writeFileSync(
 
 Versão: ${ff.version}
 Licença do build: ${ff.license} (texto em FFmpeg-LICENSE.txt; a LGPLv3 incorpora a GPLv3, em GPL-3.0.txt)
-Build: BtbN FFmpeg-Builds, variante win64-lgpl-shared (https://github.com/BtbN/FFmpeg-Builds)
+${
+  enabled.includes("chromaprint")
+    ? "Build: BtbN FFmpeg-Builds, variante win64-lgpl-shared (https://github.com/BtbN/FFmpeg-Builds)"
+    : "Build: próprio do NovaCut (.github/workflows/build-ffmpeg.yml), com os scripts do BtbN FFmpeg-Builds,\n  variante win64-lgpl-shared, sem chromaprint e sem FFTW3"
+}
 
 Código-fonte correspondente:
   FFmpeg: https://github.com/FFmpeg/FFmpeg${commit ? `/tree/${commit}` : ""}
-  Scripts de compilação (e versões das bibliotecas externas): https://github.com/BtbN/FFmpeg-Builds
+  Scripts de compilação (e versões das bibliotecas externas):
+    https://github.com/BtbN/FFmpeg-Builds/tree/${tplSources.ffmpeg.btbnCommit}${
+      enabled.includes("chromaprint") ? "" : "\n    com as alterações descritas em .github/workflows/build-ffmpeg.yml do NovaCut"
+    }
 
 As bibliotecas do FFmpeg (avcodec, avformat, avutil, avfilter, avdevice, swscale,
 swresample) são distribuídas como DLLs separadas na pasta "ffmpeg" da instalação e

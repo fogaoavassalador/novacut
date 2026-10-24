@@ -11,6 +11,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
+import { inflateRawSync } from "node:zlib";
 
 const base = resolve("third_party_licenses");
 const sourcesPath = join(base, "sources.json");
@@ -23,6 +24,64 @@ async function download(url) {
   const buf = Buffer.from(await res.arrayBuffer());
   // o gitiles (googlesource.com) entrega ?format=TEXT em base64
   return /googlesource\.com\/.*\?format=TEXT$/.test(url) ? Buffer.from(buf.toString("ascii"), "base64") : buf;
+}
+
+/**
+ * Licença que só existe nos comentários de cabeçalhos C: baixa o início de cada arquivo (Range),
+ * extrai o primeiro bloco /* … *\/ e junta os blocos distintos, indicando a quais arquivos valem.
+ */
+async function fromHeaders(urls) {
+  const blocks = new Map();
+  for (const url of urls) {
+    const res = await fetch(url, { headers: { "user-agent": "novacut-fetch-licenses", range: "bytes=0-4095" } });
+    if (!res.ok) throw new Error(`${res.status} ${url}`);
+    const comment = /\/\*([\s\S]*?)\*\//.exec(await res.text())?.[1];
+    if (!comment) throw new Error(`sem comentário de licença no início de ${url}`);
+    const text = comment.split("\n").map((l) => l.replace(/^\s*\* ?/, "").trimEnd()).join("\n").trim();
+    const name = url.split("/").pop();
+    blocks.set(text, [...(blocks.get(text) ?? []), name]);
+  }
+  return Buffer.from(
+    [...blocks].map(([text, names]) => `Arquivos: ${names.join(", ")}\n\n${text}\n`).join("\n"),
+  );
+}
+
+async function range(url, start, end) {
+  const res = await fetch(url, { headers: { "user-agent": "novacut-fetch-licenses", range: `bytes=${start}-${end}` } });
+  if (res.status !== 206) throw new Error(`${res.status} (esperado 206) ${url}`);
+  return Buffer.from(await res.arrayBuffer());
+}
+
+/**
+ * Um arquivo de dentro de um .zip remoto (ex.: a licença num .nupkg) sem baixar o pacote inteiro:
+ * lê o diretório central no fim do arquivo e depois só os bytes da entrada pedida.
+ */
+async function fromZip({ url, size, path }) {
+  const tail = await range(url, Math.max(0, size - 65536), size - 1);
+  const eocd = tail.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  if (eocd < 0) throw new Error(`fim do zip não encontrado em ${url}`);
+  const cdSize = tail.readUInt32LE(eocd + 12);
+  const cdOffset = tail.readUInt32LE(eocd + 16);
+  const cd = await range(url, cdOffset, cdOffset + cdSize - 1);
+  for (let p = 0; p < cd.length; ) {
+    const method = cd.readUInt16LE(p + 10);
+    const compSize = cd.readUInt32LE(p + 20);
+    const nameLen = cd.readUInt16LE(p + 28);
+    const extraLen = cd.readUInt16LE(p + 30);
+    const commentLen = cd.readUInt16LE(p + 32);
+    const local = cd.readUInt32LE(p + 42);
+    const name = cd.toString("utf8", p + 46, p + 46 + nameLen);
+    if (name === path) {
+      const head = await range(url, local, local + 29);
+      const dataStart = local + 30 + head.readUInt16LE(26) + head.readUInt16LE(28);
+      const data = await range(url, dataStart, dataStart + compSize - 1);
+      if (method === 0) return data;
+      if (method === 8) return inflateRawSync(data);
+      throw new Error(`método de compressão ${method} não suportado (${path})`);
+    }
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  throw new Error(`${path} não está em ${url}`);
 }
 
 /** Arquivo copiado do cache local do cargo (ex.: "cssparser-0.37.0/LICENSE"). */
@@ -45,9 +104,10 @@ async function ensure(dir, file) {
     kept++;
     return;
   }
-  const buf = file.cargo ? fromCargo(file.cargo) : await download(file.url);
+  if (file.generated) throw new Error(`${dest} ausente: gere com ${file.generated}`);
+  const buf = file.cargo ? fromCargo(file.cargo) : file.zip ? await fromZip(file.zip) : file.headers ? await fromHeaders(file.headers) : await download(file.url);
   const actual = sha256(buf);
-  if (file.sha256 && actual !== file.sha256) throw new Error(`${file.url ?? file.cargo}: SHA-256 ${actual}, esperado ${file.sha256}`);
+  if (file.sha256 && actual !== file.sha256) throw new Error(`${file.url ?? file.cargo ?? file.name}: SHA-256 ${actual}, esperado ${file.sha256}`);
   mkdirSync(dir, { recursive: true });
   writeFileSync(dest, buf);
   file.sha256 = actual;
