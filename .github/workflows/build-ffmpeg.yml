@@ -10,8 +10,6 @@
 name: build-ffmpeg
 
 on:
-  push:
-    branches: [ "chore/ffmpeg-custom-build" ]
   workflow_dispatch:
 
 permissions:
